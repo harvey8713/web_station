@@ -1,0 +1,43 @@
+{
+  "nav": {
+    "about": "About",
+    "insights": "Insights",
+    "profiles": "Profiles",
+    "culture": "Culture"
+  },
+  "hero": {
+    "eyebrow": "Jewellery · Brand · Design",
+    "title": "Magician in Jewellery",
+    "subtitle": "Decoding the language of jewellery design — brand strategy, creative vision, and the stories behind the stones.",
+    "cta": "Explore Insights",
+    "scroll": "Scroll"
+  },
+  "intro": {
+    "label": "About the Platform",
+    "heading": "Where craft meets brand intelligence",
+    "body": "Magician in Jewellery is an editorial platform dedicated to the intersection of jewellery design, brand identity, and cultural storytelling. We examine how the world's most compelling jewellery brands are built — not just worn.",
+    "link": "Read More →"
+  },
+  "articles": {
+    "title": "Latest Insights",
+    "viewAll": "View All"
+  },
+  "contact": {
+    "heading": "Let's talk about jewellery.",
+    "description": "For collaborations, editorial partnerships, or simply a conversation about the future of jewellery design.",
+    "email": "Email",
+    "instagram": "Instagram",
+    "wechat": "WeChat"
+  },
+  "footer": {
+    "copyright": "© 2025 Magician in Jewellery. All rights reserved."
+  },
+  "category": {
+    "forecast": "Forecast",
+    "profiles": "Profiles",
+    "culture": "Culture"
+  },
+  "meta": {
+    "readTime": "min read"
+  }
+}

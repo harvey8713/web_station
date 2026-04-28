@@ -1,0 +1,4 @@
+{
+  "ai-content-generator.plugin.name": "AI Content Generator",
+  "ai-content-generator.plugin.description": "Generate article content using Qwen AI"
+}

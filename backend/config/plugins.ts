@@ -1,0 +1,41 @@
+import type { Core } from '@strapi/strapi';
+
+const config = ({ env }: Core.Config.Shared.ConfigParams): Core.Config.Plugin => {
+  const plugins: Core.Config.Plugin = {
+    'ai-content-generator': {
+      enabled: true,
+      resolve: './src/plugins/ai-content-generator',
+    },
+  };
+
+  // Only configure OSS if all required credentials are provided
+  const ossBucket = env('OSS_BUCKET');
+  const ossAccessKeyId = env('OSS_ACCESS_KEY_ID');
+  const ossAccessKeySecret = env('OSS_ACCESS_KEY_SECRET');
+
+  if (ossBucket && ossAccessKeyId && ossAccessKeySecret) {
+    plugins.upload = {
+      config: {
+        provider: 'strapi-provider-upload-oss',
+        providerOptions: {
+          accessKeyId: ossAccessKeyId,
+          accessKeySecret: ossAccessKeySecret,
+          region: env('OSS_REGION'),
+          bucket: ossBucket,
+          endpoint: env('OSS_ENDPOINT'),
+          secure: true,
+          timeout: 60000,
+        },
+        actionOptions: {
+          upload: {},
+          uploadStream: {},
+          delete: {},
+        },
+      },
+    };
+  }
+
+  return plugins;
+};
+
+export default config;

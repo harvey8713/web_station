@@ -1,0 +1,16 @@
+{
+  "collectionName": "components_sections_quotes",
+  "info": { "displayName": "Quote 引言", "icon": "quote" },
+  "options": {},
+  "attributes": {
+    "quote":       { "type": "text" },
+    "attribution": { "type": "string" },
+    "layout": {
+      "type": "enumeration",
+      "enum": ["dark", "light", "gold"],
+      "default": "light"
+    },
+    "padding_top":    { "type": "integer" },
+    "padding_bottom": { "type": "integer" }
+  }
+}

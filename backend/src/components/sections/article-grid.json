@@ -1,0 +1,18 @@
+{
+  "collectionName": "components_sections_article_grids",
+  "info": { "displayName": "Article Grid 文章网格", "icon": "apps" },
+  "options": {},
+  "attributes": {
+    "title_prefix":    { "type": "string" },
+    "title_highlight": { "type": "string" },
+    "article_count":   { "type": "integer", "default": 3 },
+    "view_all_text":   { "type": "string" },
+    "layout": {
+      "type": "enumeration",
+      "enum": ["3-col", "2-col", "list"],
+      "default": "3-col"
+    },
+    "padding_top":    { "type": "integer" },
+    "padding_bottom": { "type": "integer" }
+  }
+}

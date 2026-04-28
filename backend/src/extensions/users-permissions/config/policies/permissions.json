@@ -1,0 +1,28 @@
+{
+  "public": {
+    "api::article.article": {
+      "controllers": {
+        "article": {
+          "find": {"enabled": true},
+          "findOne": {"enabled": true}
+        }
+      }
+    },
+    "api::category.category": {
+      "controllers": {
+        "category": {
+          "find": {"enabled": true},
+          "findOne": {"enabled": true}
+        }
+      }
+    },
+    "api::tag.tag": {
+      "controllers": {
+        "tag": {
+          "find": {"enabled": true},
+          "findOne": {"enabled": true}
+        }
+      }
+    }
+  }
+}

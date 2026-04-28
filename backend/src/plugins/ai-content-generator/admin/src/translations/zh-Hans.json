@@ -1,0 +1,4 @@
+{
+  "ai-content-generator.plugin.name": "AI 内容生成器",
+  "ai-content-generator.plugin.description": "使用通义千问AI生成文章内容"
+}

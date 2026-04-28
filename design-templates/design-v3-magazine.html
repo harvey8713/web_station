@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>V3 — Magazine Editorial · Magician in Jewellery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #F4F2ED;
+      --bg2: #ECEAE3;
+      --ink: #191916;
+      --ink-muted: #7A7A74;
+      --accent: #111;
+      --serif: 'EB Garamond', Georgia, serif;
+      --sans: 'Outfit', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--ink); font-family: var(--sans); overflow-x: hidden; }
+
+    /* ── NAV ── */
+    nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 60px;
+      background: var(--bg);
+      border-bottom: 2px solid var(--ink);
+    }
+    .nav-brand {
+      font-family: var(--serif); font-size: 14px; font-weight: 500;
+      letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink);
+    }
+    .nav-center {
+      position: absolute; left: 50%; transform: translateX(-50%);
+    }
+    .nav-logo img { height: 40px; width: auto; }
+    .nav-right { display: flex; align-items: center; gap: 32px; }
+    .nav-links { display: flex; gap: 32px; list-style: none; }
+    .nav-links a {
+      font-family: var(--sans); font-size: 11px; font-weight: 400;
+      letter-spacing: 0.14em; text-transform: uppercase; text-decoration: none;
+      color: var(--ink-muted); transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--ink); }
+    .lang-toggle { display: flex; gap: 0; }
+    .lang-toggle button {
+      background: none; border: 1px solid var(--ink); cursor: pointer;
+      font-family: var(--sans); font-size: 10px; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 4px 10px; color: var(--ink-muted); transition: all 0.2s;
+    }
+    .lang-toggle button:first-child { border-right: none; }
+    .lang-toggle button.active { background: var(--ink); color: var(--bg); }
+
+    /* ── HERO ── */
+    .hero {
+      display: grid; grid-template-columns: 55% 45%;
+      height: calc(100vh - 82px); min-height: 600px;
+    }
+    .hero-left {
+      position: relative; overflow: hidden;
+      background: linear-gradient(rgba(14,10,6,0.22), rgba(14,10,6,0.32)),
+        url('https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=1200&q=85') center/cover no-repeat;
+      border-right: 2px solid var(--ink);
+    }
+    .hero-left::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 50% 60%, rgba(180,140,80,0.1) 0%, transparent 65%);
+    }
+    .hero-left-label {
+      position: absolute; top: 40px; left: 40px;
+      font-family: var(--sans); font-size: 10px; font-weight: 400;
+      letter-spacing: 0.28em; text-transform: uppercase;
+      color: rgba(255,255,255,0.3); z-index: 1;
+    }
+    .hero-left-number {
+      position: absolute; bottom: 40px; right: 40px;
+      font-family: var(--serif); font-size: 120px; font-weight: 600;
+      color: rgba(255,255,255,0.04); line-height: 1;
+      pointer-events: none;
+    }
+    .hero-left-tag {
+      position: absolute; bottom: 40px; left: 40px; z-index: 1;
+      font-family: var(--sans); font-size: 10px; font-weight: 400;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: rgba(255,255,255,0.4);
+      display: flex; align-items: center; gap: 12px;
+    }
+    .hero-left-tag::before {
+      content: ''; display: block; width: 32px; height: 1px;
+      background: rgba(255,255,255,0.3);
+    }
+    .hero-right {
+      display: flex; flex-direction: column;
+      justify-content: center; padding: 60px 64px;
+      background: var(--bg); position: relative;
+    }
+    .hero-issue-no {
+      font-family: var(--sans); font-size: 10px; font-weight: 600;
+      letter-spacing: 0.3em; text-transform: uppercase; color: var(--ink-muted);
+      margin-bottom: 36px; display: flex; align-items: center; gap: 16px;
+    }
+    .hero-issue-no::after { content: ''; flex: 1; height: 1px; background: currentColor; opacity: 0.3; }
+    .hero-title {
+      font-family: var(--serif); font-size: clamp(52px, 6vw, 86px);
+      font-weight: 400; line-height: 1.05; letter-spacing: -0.01em;
+      margin-bottom: 32px;
+    }
+    .hero-title em { font-style: italic; }
+    .hero-body {
+      font-family: var(--sans); font-size: 14px; font-weight: 300;
+      line-height: 1.85; color: var(--ink-muted);
+      max-width: 380px; margin-bottom: 48px;
+    }
+    .hero-cta-row { display: flex; align-items: center; gap: 32px; }
+    .btn-primary {
+      display: inline-block;
+      font-family: var(--sans); font-size: 11px; font-weight: 600;
+      letter-spacing: 0.18em; text-transform: uppercase; text-decoration: none;
+      color: var(--bg); background: var(--ink);
+      padding: 14px 36px; transition: opacity 0.2s;
+    }
+    .btn-primary:hover { opacity: 0.8; }
+    .btn-ghost {
+      font-family: var(--sans); font-size: 11px; font-weight: 400;
+      letter-spacing: 0.14em; text-transform: uppercase; text-decoration: none;
+      color: var(--ink-muted); border-bottom: 1px solid currentColor;
+      padding-bottom: 2px; transition: color 0.2s;
+    }
+    .btn-ghost:hover { color: var(--ink); }
+
+    /* ── STRIP ── */
+    .strip {
+      background: var(--ink); color: var(--bg);
+      display: flex; overflow: hidden;
+    }
+    .strip-item {
+      flex: 1; padding: 28px 40px;
+      border-right: 1px solid rgba(255,255,255,0.08);
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .strip-item:last-child { border-right: none; }
+    .strip-num {
+      font-family: var(--serif); font-size: 40px; font-weight: 400;
+      font-style: italic; color: rgba(255,255,255,0.2); line-height: 1;
+    }
+    .strip-label {
+      font-family: var(--sans); font-size: 12px; font-weight: 500;
+      letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.7);
+    }
+    .strip-desc {
+      font-family: var(--sans); font-size: 12px; font-weight: 300;
+      color: rgba(255,255,255,0.4); line-height: 1.6;
+    }
+
+    /* ── ARTICLES MAGAZINE LAYOUT ── */
+    .articles-section { padding: 80px 60px; }
+    .section-rule {
+      display: flex; align-items: center; gap: 24px;
+      margin-bottom: 56px;
+    }
+    .section-rule-title {
+      font-family: var(--serif); font-size: 13px; font-weight: 400;
+      letter-spacing: 0.25em; text-transform: uppercase; color: var(--ink-muted);
+      white-space: nowrap;
+    }
+    .section-rule-line { flex: 1; height: 1px; background: var(--ink); }
+    .section-rule-link {
+      font-family: var(--sans); font-size: 10px; font-weight: 500;
+      letter-spacing: 0.2em; text-transform: uppercase; text-decoration: none;
+      color: var(--ink-muted); white-space: nowrap; transition: color 0.2s;
+    }
+    .section-rule-link:hover { color: var(--ink); }
+
+    .magazine-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-rows: auto auto;
+      gap: 2px;
+      background: var(--ink);
+    }
+    .mag-card {
+      background: var(--bg); overflow: hidden; cursor: pointer;
+    }
+    .mag-card.span-2 { grid-column: span 2; }
+    .mag-card-image {
+      width: 100%; overflow: hidden;
+    }
+    .mag-card.span-2 .mag-card-image { aspect-ratio: 16/9; }
+    .mag-card:not(.span-2) .mag-card-image { aspect-ratio: 4/3; }
+    .mag-img-inner { width: 100%; height: 100%; transition: transform 0.6s; }
+    .mag-card:hover .mag-img-inner { transform: scale(1.04); }
+    .img-a { background: url('https://images.unsplash.com/photo-1543294001-f7cd5d7fb516?w=1200&q=80') center/cover no-repeat; }
+    .img-b { background: url('https://images.unsplash.com/photo-1547996160-81dfa63595aa?w=800&q=80') center/cover no-repeat; }
+    .img-c { background: url('https://images.unsplash.com/photo-1611085583191-a3b181a88401?w=800&q=80') center/cover no-repeat; }
+    .mag-card-body { padding: 24px 28px 32px; }
+    .mag-cat {
+      font-family: var(--sans); font-size: 9px; font-weight: 600;
+      letter-spacing: 0.3em; text-transform: uppercase; color: var(--ink-muted);
+      margin-bottom: 10px;
+    }
+    .mag-title {
+      font-family: var(--serif); font-size: 21px; font-weight: 500;
+      line-height: 1.35; margin-bottom: 12px; color: var(--ink);
+    }
+    .mag-card.span-2 .mag-title { font-size: 28px; }
+    .mag-excerpt {
+      font-family: var(--sans); font-size: 13px; font-weight: 300;
+      line-height: 1.7; color: var(--ink-muted);
+    }
+    .mag-date {
+      font-family: var(--sans); font-size: 10px; color: var(--ink-muted);
+      margin-top: 16px;
+    }
+
+    /* ── CONTACT ── */
+    .contact {
+      background: var(--bg2);
+      border-top: 2px solid var(--ink);
+      padding: 80px 60px;
+      display: flex; align-items: center; justify-content: space-between; gap: 60px;
+    }
+    .contact-left { max-width: 480px; }
+    .contact-kicker {
+      font-family: var(--sans); font-size: 10px; font-weight: 600;
+      letter-spacing: 0.3em; text-transform: uppercase; color: var(--ink-muted);
+      margin-bottom: 24px;
+    }
+    .contact-h {
+      font-family: var(--serif); font-size: clamp(36px, 4vw, 52px);
+      font-weight: 400; line-height: 1.15; margin-bottom: 24px;
+    }
+    .contact-h em { font-style: italic; }
+    .contact-p {
+      font-family: var(--sans); font-size: 14px; font-weight: 300;
+      line-height: 1.8; color: var(--ink-muted);
+    }
+    .contact-right { flex-shrink: 0; }
+    .contact-list { list-style: none; display: flex; flex-direction: column; gap: 24px; }
+    .contact-list li { border-top: 1px solid rgba(0,0,0,0.08); padding-top: 20px; }
+    .cl-label {
+      font-family: var(--sans); font-size: 9px; font-weight: 600;
+      letter-spacing: 0.3em; text-transform: uppercase; color: var(--ink-muted);
+      margin-bottom: 6px;
+    }
+    .cl-val {
+      font-family: var(--serif); font-size: 18px; color: var(--ink);
+    }
+    .cl-val a { color: inherit; text-decoration: none; }
+    .cl-val a:hover { text-decoration: underline; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--ink); color: rgba(255,255,255,0.4);
+      padding: 28px 60px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .footer-copy { font-family: var(--sans); font-size: 11px; }
+    .footer-links { display: flex; gap: 24px; list-style: none; }
+    .footer-links a {
+      font-family: var(--sans); font-size: 10px; letter-spacing: 0.15em;
+      text-transform: uppercase; text-decoration: none; color: inherit; transition: color 0.2s;
+    }
+    .footer-links a:hover { color: rgba(255,255,255,0.8); }
+
+    @media (max-width: 900px) {
+      nav { padding: 16px 20px; }
+      .nav-center { position: static; transform: none; }
+      .nav-links { display: none; }
+      .hero { grid-template-columns: 1fr; height: auto; }
+      .hero-left { height: 50vw; min-height: 220px; border-right: none; border-bottom: 2px solid var(--ink); }
+      .hero-right { padding: 40px 24px; }
+      .strip { flex-direction: column; }
+      .strip-item { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.08); }
+      .articles-section { padding: 48px 20px; }
+      .magazine-grid { grid-template-columns: 1fr; }
+      .mag-card.span-2 { grid-column: span 1; }
+      .contact { flex-direction: column; padding: 48px 24px; gap: 40px; }
+      footer { padding: 24px 20px; flex-direction: column; gap: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-center">
+      <img src="logo.jpg" alt="Magician in Jewellery" style="height:44px;width:auto;" />
+    </div>
+    <ul class="nav-links">
+      <li><a href="#" data-zh="洞察">Insights</a></li>
+      <li><a href="#" data-zh="人物">Profiles</a></li>
+      <li><a href="#" data-zh="文化">Culture</a></li>
+      <li><a href="#" data-zh="关于">About</a></li>
+    </ul>
+    <div class="lang-toggle">
+      <button class="active" data-lang="en" onclick="switchLang('en')">EN</button>
+      <button data-lang="zh" onclick="switchLang('zh')">中文</button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-left">
+      <span class="hero-left-label">Magician in Jewellery</span>
+      <div class="hero-left-number">01</div>
+      <div class="hero-left-tag">Photography coming soon</div>
+    </div>
+    <div class="hero-right">
+      <div class="hero-issue-no" data-zh="编辑 · 2025年4月">Editorial · April 2025</div>
+      <h1 class="hero-title">
+        Decoding the<br/><em>culture</em> of<br/>jewellery design
+      </h1>
+      <p class="hero-body" data-zh="品牌智识、创意愿景，以及那些正在塑造珠宝产业的无名故事——从上海到巴黎。">
+        Brand intelligence, creative vision, and the untold stories shaping
+        the jewellery industry from Shanghai to Paris.
+      </p>
+      <div class="hero-cta-row">
+        <a href="#" class="btn-primary" data-zh="阅读最新">Read Latest</a>
+        <a href="#" class="btn-ghost" data-zh="关于我们">About us</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- STRIP -->
+  <div class="strip">
+    <div class="strip-item">
+      <div class="strip-num">01</div>
+      <div class="strip-label">Forecast</div>
+      <div class="strip-desc">Trend analysis & market intelligence</div>
+    </div>
+    <div class="strip-item">
+      <div class="strip-num">02</div>
+      <div class="strip-label">Profiles</div>
+      <div class="strip-desc">Designers & brand founders in focus</div>
+    </div>
+    <div class="strip-item">
+      <div class="strip-num">03</div>
+      <div class="strip-label">Culture</div>
+      <div class="strip-desc">History, craft, and meaning of jewels</div>
+    </div>
+    <div class="strip-item">
+      <div class="strip-num">04</div>
+      <div class="strip-label">Insights</div>
+      <div class="strip-desc">Brand strategy & creative vision</div>
+    </div>
+  </div>
+
+  <!-- ARTICLES -->
+  <section class="articles-section">
+    <div class="section-rule">
+      <span class="section-rule-title" data-zh="最新文章">Latest Stories</span>
+      <div class="section-rule-line"></div>
+      <a href="#" class="section-rule-link" data-zh="查看全部 →">View All →</a>
+    </div>
+    <div class="magazine-grid">
+      <article class="mag-card span-2">
+        <div class="mag-card-image">
+          <div class="mag-img-inner img-a"></div>
+        </div>
+        <div class="mag-card-body">
+          <p class="mag-cat" data-zh="趋势预测 · 精选">Forecast · Featured</p>
+          <h3 class="mag-title" data-zh="欲望的建筑学：形式如何定义奢侈珠宝品牌">The Architecture of Desire: How Form Defines Luxury Jewellery Brands</h3>
+          <p class="mag-excerpt" data-zh="当一个珠宝品牌历经百年而不衰，靠的绝不只是宝石本身。而是它围绕宝石所构建的一切——那套语言、那种建筑感，以及它世代维系的欲望神话。">When a jewellery brand endures across centuries, it is rarely because of the stones alone. It is because of the world it has built around them — the language, the architecture, the mythology of desire it constructs and sustains.</p>
+          <p class="mag-date" data-zh="2025年4月 · 8分钟阅读">April 2025 · 8 min read</p>
+        </div>
+      </article>
+      <article class="mag-card">
+        <div class="mag-card-image">
+          <div class="mag-img-inner img-b"></div>
+        </div>
+        <div class="mag-card-body">
+          <p class="mag-cat" data-zh="人物">Profiles</p>
+          <h3 class="mag-title" data-zh="超越宝石：独立设计师的新语言">Beyond the Stone: The New Language of Independent Designers</h3>
+          <p class="mag-excerpt" data-zh="新一代正在重新书写规则……">A new generation is rewriting the rules…</p>
+          <p class="mag-date" data-zh="2025年3月">March 2025</p>
+        </div>
+      </article>
+      <article class="mag-card">
+        <div class="mag-card-image" style="aspect-ratio:1/1;">
+          <div class="mag-img-inner img-c"></div>
+        </div>
+      </article>
+      <article class="mag-card" style="grid-column: span 2;">
+        <div class="mag-card-body" style="padding: 32px 36px;">
+          <p class="mag-cat" data-zh="文化">Culture</p>
+          <h3 class="mag-title" style="font-size:24px;" data-zh="东方 × 西方：亚洲珠宝品牌如何重塑全球奢华叙事">East × West: How Asian Jewellery Brands Are Reshaping Global Luxury Narratives</h3>
+          <p class="mag-excerpt" data-zh="从上海到巴黎，珠宝设计的轴心正在位移。这对品牌身份、消费者行为和下一个十年的视觉语言意味着什么。">From Shanghai to Paris, the axis of jewellery design is shifting. Here's what that means for brand identity, consumer behaviour, and the visual language of the next decade.</p>
+          <p class="mag-date" data-zh="2025年3月 · 7分钟阅读">March 2025 · 7 min read</p>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="contact">
+    <div class="contact-left">
+      <p class="contact-kicker" data-zh="联系我们">Get In Touch</p>
+      <h2 class="contact-h" data-zh="来聊聊&lt;br/&gt;&lt;em&gt;珠宝设计。&lt;/em&gt;">Let's talk about<br/><em>jewellery design.</em></h2>
+      <p class="contact-p" data-zh="欢迎洽谈合作、联合编辑，或是探讨珠宝的未来。">For collaborations, editorial partnerships, or simply a conversation about the future of jewellery.</p>
+    </div>
+    <div class="contact-right">
+      <ul class="contact-list">
+        <li>
+          <p class="cl-label" data-zh="邮箱">Email</p>
+          <p class="cl-val"><a href="#">hello@magicianinjewellery.com</a></p>
+        </li>
+        <li>
+          <p class="cl-label">Instagram</p>
+          <p class="cl-val"><a href="#">@magicianinjewellery</a></p>
+        </li>
+        <li>
+          <p class="cl-label" data-zh="微信">WeChat</p>
+          <p class="cl-val">MagicianInJewellery</p>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p class="footer-copy" data-zh="© 2025 Magician in Jewellery · 版权所有">© 2025 Magician in Jewellery</p>
+    <ul class="footer-links">
+      <li><a href="#">Instagram</a></li>
+      <li><a href="#" data-zh="微信">WeChat</a></li>
+      <li><a href="#">LinkedIn</a></li>
+    </ul>
+  </footer>
+
+<script>
+function switchLang(lang) {
+  document.querySelectorAll('[data-lang]').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+  document.querySelectorAll('[data-zh]').forEach(el => {
+    if (!el.dataset.en) el.dataset.en = el.innerHTML;
+    el.innerHTML = lang === 'zh' ? el.dataset.zh : el.dataset.en;
+  });
+  document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+  localStorage.setItem('mij-lang', lang);
+}
+window.addEventListener('DOMContentLoaded', () => {
+  if (localStorage.getItem('mij-lang') === 'zh') switchLang('zh');
+});
+</script>
+</body>
+</html>

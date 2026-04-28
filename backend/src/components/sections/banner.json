@@ -1,0 +1,26 @@
+{
+  "collectionName": "components_sections_banners",
+  "info": { "displayName": "Banner 横幅", "icon": "picture" },
+  "options": {},
+  "attributes": {
+    "heading":              { "type": "string" },
+    "subtitle":             { "type": "string" },
+    "cta_text":             { "type": "string" },
+    "cta_link":             { "type": "string" },
+    "background_image_url": { "type": "string" },
+    "overlay_opacity": {
+      "type": "integer",
+      "default": 40,
+      "min": 0,
+      "max": 80
+    },
+    "layout": {
+      "type": "enumeration",
+      "enum": ["left", "centered"],
+      "default": "centered"
+    },
+    "min_height":     { "type": "integer" },
+    "padding_top":    { "type": "integer" },
+    "padding_bottom": { "type": "integer" }
+  }
+}

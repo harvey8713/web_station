@@ -1,0 +1,15 @@
+{
+  "collectionName": "components_sections_contact_bands",
+  "info": { "displayName": "Contact Band 联系区", "icon": "phone" },
+  "options": {},
+  "attributes": {
+    "heading_line1": { "type": "string" },
+    "heading_line2": { "type": "string" },
+    "description":   { "type": "text" },
+    "email":         { "type": "string" },
+    "instagram":     { "type": "string" },
+    "wechat":        { "type": "string" },
+    "padding_top":    { "type": "integer" },
+    "padding_bottom": { "type": "integer" }
+  }
+}

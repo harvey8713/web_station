@@ -1,0 +1,15 @@
+{
+  "collectionName": "components_sections_featured_articles",
+  "info": { "displayName": "Featured Article 精选文章", "icon": "star" },
+  "options": {},
+  "attributes": {
+    "label": { "type": "string" },
+    "layout": {
+      "type": "enumeration",
+      "enum": ["image-left", "image-right"],
+      "default": "image-left"
+    },
+    "padding_top":    { "type": "integer" },
+    "padding_bottom": { "type": "integer" }
+  }
+}

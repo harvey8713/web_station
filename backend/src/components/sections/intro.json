@@ -1,0 +1,22 @@
+{
+  "collectionName": "components_sections_intros",
+  "info": { "displayName": "Intro 图文介绍", "icon": "layout" },
+  "options": {},
+  "attributes": {
+    "label":                { "type": "string" },
+    "heading_zh":           { "type": "string" },
+    "heading_en":           { "type": "string" },
+    "body":                 { "type": "text" },
+    "link_text":            { "type": "string" },
+    "link_url":             { "type": "string" },
+    "background_image_url": { "type": "string" },
+    "layout": {
+      "type": "enumeration",
+      "enum": ["image-left", "image-right", "text-only", "text-centered"],
+      "default": "image-left"
+    },
+    "min_height":     { "type": "integer" },
+    "padding_top":    { "type": "integer" },
+    "padding_bottom": { "type": "integer" }
+  }
+}

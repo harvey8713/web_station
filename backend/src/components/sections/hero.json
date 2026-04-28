@@ -1,0 +1,20 @@
+{
+  "collectionName": "components_sections_heroes",
+  "info": { "displayName": "Hero 大标题", "icon": "dashboard" },
+  "options": {},
+  "attributes": {
+    "eyebrow":     { "type": "string" },
+    "title_line1": { "type": "string" },
+    "title_line2": { "type": "string" },
+    "subtitle":    { "type": "string" },
+    "cta_text":    { "type": "string" },
+    "cta_link":    { "type": "string" },
+    "layout": {
+      "type": "enumeration",
+      "enum": ["left", "centered"],
+      "default": "left"
+    },
+    "padding_top":    { "type": "integer" },
+    "padding_bottom": { "type": "integer" }
+  }
+}
