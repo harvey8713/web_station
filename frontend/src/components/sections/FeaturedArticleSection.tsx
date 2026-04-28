@@ -19,13 +19,19 @@ export default function FeaturedArticleSection({data, locale, article}: Props) {
 
   const imageBlock = (
     <div className="relative overflow-hidden aspect-[4/3] md:aspect-auto md:min-h-[480px]">
-      <Image
-        src={getImageUrl(article.cover_image?.url)}
-        alt={article.cover_image?.alternativeText || article.title}
-        fill
-        unoptimized
-        className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-      />
+      {article.cover_image?.url ? (
+        <Image
+          src={getImageUrl(article.cover_image.url)}
+          alt={article.cover_image.alternativeText || article.title}
+          fill
+          unoptimized
+          className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+        />
+      ) : (
+        <div className="w-full h-full min-h-[480px] bg-[var(--paper)] flex items-center justify-center">
+          <span className="text-[var(--gold)] text-5xl opacity-30">✦</span>
+        </div>
+      )}
     </div>
   );
 

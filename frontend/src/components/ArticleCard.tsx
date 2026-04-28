@@ -17,13 +17,19 @@ export default function ArticleCard({article}: ArticleCardProps) {
       <Link href={`/articles/${article.slug}`}>
         <div className="w-full aspect-[4/3] overflow-hidden mb-6 relative">
           <div className="w-full h-full transition-transform duration-[600ms] ease-out group-hover:scale-[1.04]">
-            <Image
-              src={getImageUrl(article.cover_image?.url)}
-              alt={article.cover_image?.alternativeText || article.title}
-              fill
-              unoptimized
-              className="object-cover"
-            />
+            {article.cover_image?.url ? (
+              <Image
+                src={getImageUrl(article.cover_image.url)}
+                alt={article.cover_image.alternativeText || article.title}
+                fill
+                unoptimized
+                className="object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-[var(--paper)] flex items-center justify-center">
+                <span className="text-[var(--gold)] text-4xl opacity-40">✦</span>
+              </div>
+            )}
           </div>
         </div>
         <p className="font-sans text-[9px] font-medium tracking-[0.25em] uppercase text-[var(--gold)] mb-3">
