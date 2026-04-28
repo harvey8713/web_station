@@ -11,6 +11,7 @@
     "develop": "mkdir -p public/uploads && strapi develop",
     "start": "mkdir -p public/uploads && strapi start",
     "strapi": "strapi",
+    "sync:railway-content": "node scripts/sync-local-content-to-railway.js",
     "upgrade": "npx @strapi/upgrade latest",
     "upgrade:dry": "npx @strapi/upgrade latest --dry"
   },

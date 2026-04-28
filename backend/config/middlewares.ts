@@ -8,7 +8,12 @@ const config: Core.Config.Middlewares = [
     name: 'strapi::cors',
     config: {
       enabled: true,
-      origin: ['http://localhost:3000', 'https://frontend-harvey8713s-projects.vercel.app', 'https://*.vercel.app'],
+      origin: [
+        'http://localhost:3000',
+        'https://frontend-harvey8713s-projects.vercel.app',
+        'https://*.vercel.app',
+        'https://*.up.railway.app',
+      ],
       credentials: true,
     },
   },
