@@ -22,6 +22,28 @@ const api = axios.create({
   timeout: 30000,
 });
 
+async function uploadImage(imageUrl, filenameHint = 'cover.jpg') {
+  if (!imageUrl) return null;
+  try {
+    const imgRes = await axios.get(imageUrl, { responseType: 'arraybuffer', timeout: 30000 });
+    const buffer = Buffer.from(imgRes.data);
+    const contentType = imgRes.headers['content-type'] || 'image/jpeg';
+    const safeName = filenameHint.replace(/[^a-zA-Z0-9._-]/g, '-');
+    const formData = new FormData();
+    formData.append('files', new Blob([buffer], { type: contentType }), safeName);
+    const res = await fetch(`${TARGET_URL}/api/upload`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${TARGET_TOKEN}` },
+      body: formData,
+    });
+    const data = await res.json();
+    return data[0]?.id || null;
+  } catch (e) {
+    console.warn(`  图片上传失败 (${filenameHint}): ${e.message}`);
+    return null;
+  }
+}
+
 // ─── 数据 ───────────────────────────────────────────────────────────────────
 
 const CATEGORIES = [
@@ -38,6 +60,7 @@ const CATEGORIES = [
 const ARTICLES = [
   {
     slug: 'brand-identity-luxury-jewelry',
+    cover_image_url: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=800&auto=format&fit=crop',
     category: 'brand-strategy',
     zh: {
       title: '奢侈珠宝品牌的身份构建：从符号到情感',
@@ -113,6 +136,7 @@ The brand competition in the jewelry industry is fundamentally a competition for
   },
   {
     slug: 'minimalism-fine-jewelry-design',
+    cover_image_url: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=800&auto=format&fit=crop',
     category: 'design-aesthetics',
     zh: {
       title: '极简主义与当代精致珠宝：少即是多的设计哲学',
@@ -180,6 +204,7 @@ These details aren't meant to be seen at first glance, but to be discovered in a
   },
   {
     slug: 'jade-cultural-significance-modern-design',
+    cover_image_url: 'https://images.unsplash.com/photo-1617727553252-65863e55e7f1?w=800&auto=format&fit=crop',
     category: 'cultural-narrative',
     zh: {
       title: '玉的文化重量：从传统符号到当代珠宝叙事',
@@ -256,6 +281,7 @@ If your brand hopes to tell the story of Chinese jade culture in international m
   },
   {
     slug: 'diamond-grading-guide-4cs',
+    cover_image_url: 'https://images.unsplash.com/photo-1573408301185-9519f94953b7?w=800&auto=format&fit=crop',
     category: 'materials-craft',
     zh: {
       title: '钻石4C评级深度解析：消费者真正需要懂的那些事',
@@ -339,6 +365,7 @@ Don't be held hostage by every number on the certificate. The only final criteri
   },
   {
     slug: 'social-media-jewelry-brand-building',
+    cover_image_url: 'https://images.unsplash.com/photo-1583292650898-7d22cd27ca6f?w=800&auto=format&fit=crop',
     category: 'brand-strategy',
     zh: {
       title: '社交媒体时代的珠宝品牌建设：内容策略与社群运营',
@@ -424,6 +451,7 @@ The strongest jewelry brand communities are those where consumers feel "this bra
   },
   {
     slug: 'ethical-sourcing-sustainable-jewelry',
+    cover_image_url: 'https://images.unsplash.com/photo-1602173574767-37ac01994b2a?w=800&auto=format&fit=crop',
     category: 'materials-craft',
     zh: {
       title: '道德采购与可持续珠宝：当Z世代遇上供应链透明度',
@@ -579,11 +607,15 @@ async function seedArticles(categoryMap) {
   for (const article of ARTICLES) {
     let existing = await findBySlug('/articles', article.slug);
 
+    const imageId = await uploadImage(article.cover_image_url, `${article.slug}.jpg`);
+    if (imageId) console.log(`  图片上传成功 id=${imageId}`);
+
     const zhData = {
       ...article.zh,
       slug: article.slug,
       category: categoryMap.get(article.category),
       locale: 'zh-CN',
+      ...(imageId && { cover_image: imageId }),
     };
 
     let documentId;
