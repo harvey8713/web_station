@@ -550,7 +550,7 @@ async function seedCategories() {
       console.log(`  创建: ${cat.zh.name}`);
     }
 
-    await api.put(`/categories/${documentId}`, { data: cat.en }, {
+    await api.put(`/categories/${documentId}`, { data: { ...cat.en, slug: cat.zh.slug } }, {
       params: { locale: 'en', status: 'published' },
     });
 
@@ -589,7 +589,7 @@ async function seedArticles(categoryMap) {
       console.log(`  创建: ${article.zh.title}`);
     }
 
-    await api.put(`/articles/${documentId}`, { data: article.en }, {
+    await api.put(`/articles/${documentId}`, { data: { ...article.en, slug: article.slug } }, {
       params: { locale: 'en', status: 'published' },
     });
   }
