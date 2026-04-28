@@ -22,6 +22,36 @@ const api = axios.create({
   timeout: 30000,
 });
 
+async function withRetry(fn, label, retries = 3) {
+  for (let i = 1; i <= retries; i++) {
+    try {
+      return await fn();
+    } catch (e) {
+      const code = e.code || e.response?.status;
+      if (i < retries && (code === 'ECONNRESET' || code === 'ETIMEDOUT' || code === 'ECONNREFUSED' || code === 503)) {
+        console.warn(`  ${label} 重试 (${i}/${retries - 1})...`);
+        await new Promise(r => setTimeout(r, 2000 * i));
+      } else {
+        throw e;
+      }
+    }
+  }
+}
+
+async function warmUp() {
+  console.log('正在唤醒服务...');
+  for (let i = 0; i < 3; i++) {
+    try {
+      await api.get('/categories?pagination[pageSize]=1');
+      console.log('服务已就绪\n');
+      return;
+    } catch {
+      await new Promise(r => setTimeout(r, 3000));
+    }
+  }
+  console.log('服务响应缓慢，继续执行...\n');
+}
+
 async function uploadImage(imageUrl, filenameHint = 'cover.jpg') {
   if (!imageUrl) return null;
   try {
@@ -29,15 +59,16 @@ async function uploadImage(imageUrl, filenameHint = 'cover.jpg') {
     const buffer = Buffer.from(imgRes.data);
     const contentType = imgRes.headers['content-type'] || 'image/jpeg';
     const safeName = filenameHint.replace(/[^a-zA-Z0-9._-]/g, '-');
-    const formData = new FormData();
-    formData.append('files', new Blob([buffer], { type: contentType }), safeName);
-    const res = await fetch(`${TARGET_URL}/api/upload`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${TARGET_TOKEN}` },
-      body: formData,
+
+    const FormData = require('form-data');
+    const form = new FormData();
+    form.append('files', buffer, { filename: safeName, contentType });
+
+    const uploadRes = await axios.post(`${TARGET_URL}/api/upload`, form, {
+      headers: { Authorization: `Bearer ${TARGET_TOKEN}`, ...form.getHeaders() },
+      timeout: 30000,
     });
-    const data = await res.json();
-    return data[0]?.id || null;
+    return uploadRes.data[0]?.id || null;
   } catch (e) {
     console.warn(`  图片上传失败 (${filenameHint}): ${e.message}`);
     return null;
