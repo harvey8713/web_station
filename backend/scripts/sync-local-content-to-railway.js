@@ -1,148 +1,128 @@
 const axios = require('axios');
-const fs = require('fs');
-const os = require('os');
-const path = require('path');
-const { createStrapi } = require('@strapi/strapi');
 
-const SOURCE_STRAPI_URL = process.env.SOURCE_STRAPI_URL;
-const SOURCE_STRAPI_TOKEN = process.env.SOURCE_STRAPI_TOKEN;
+const SOURCE_URL = (process.env.SOURCE_STRAPI_URL || '').replace(/\/$/, '');
+const SOURCE_TOKEN = process.env.SOURCE_STRAPI_TOKEN;
+const TARGET_URL = (process.env.TARGET_STRAPI_URL || '').replace(/\/$/, '');
+const TARGET_TOKEN = process.env.TARGET_STRAPI_TOKEN;
 
-if (!SOURCE_STRAPI_URL || !SOURCE_STRAPI_TOKEN) {
-  throw new Error('缺少 SOURCE_STRAPI_URL / SOURCE_STRAPI_TOKEN');
+if (!SOURCE_URL || !SOURCE_TOKEN || !TARGET_URL || !TARGET_TOKEN) {
+  console.error('缺少环境变量: SOURCE_STRAPI_URL, SOURCE_STRAPI_TOKEN, TARGET_STRAPI_URL, TARGET_STRAPI_TOKEN');
+  process.exit(1);
 }
 
-function createSourceApi() {
-  return axios.create({
-    baseURL: `${SOURCE_STRAPI_URL.replace(/\/$/, '')}/api`,
-    headers: {
-      Authorization: `Bearer ${SOURCE_STRAPI_TOKEN}`,
-      'Content-Type': 'application/json',
-    },
-    timeout: 30000,
+const sourceApi = axios.create({
+  baseURL: `${SOURCE_URL}/api`,
+  headers: { Authorization: `Bearer ${SOURCE_TOKEN}` },
+  timeout: 30000,
+});
+
+const targetApi = axios.create({
+  baseURL: `${TARGET_URL}/api`,
+  headers: { Authorization: `Bearer ${TARGET_TOKEN}` },
+  timeout: 60000,
+});
+
+async function fetchAll(api, path, params = {}) {
+  const res = await api.get(path, {
+    params: { 'pagination[pageSize]': 100, 'pagination[page]': 1, ...params },
   });
+  return res.data.data || [];
 }
 
-const sourceApi = createSourceApi();
-
-async function fetchAll(pathname, params = {}) {
-  const response = await sourceApi.get(pathname, {
-    params: {
-      'pagination[page]': 1,
-      'pagination[pageSize]': 100,
-      ...params,
-    },
-  });
-  return response.data.data || [];
+async function fetchOne(api, path, params = {}) {
+  const res = await api.get(path, { params });
+  return res.data.data || null;
 }
 
-async function fetchOne(pathname, params = {}) {
-  const response = await sourceApi.get(pathname, { params });
-  return response.data.data || null;
-}
-
-async function uploadRemoteImageToTarget(strapi, url, filenameHint = 'image.jpg') {
-  if (!url) return null;
-
-  const response = await axios.get(url, { responseType: 'arraybuffer', timeout: 30000 });
-  const safeName = filenameHint.replace(/[^a-zA-Z0-9._-]/g, '-');
-  const tmpDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'sync-upload-'));
-  const tmpPath = path.join(tmpDir, safeName);
-  await fs.promises.writeFile(tmpPath, response.data);
-
-  const stats = await fs.promises.stat(tmpPath);
-  const file = {
-    filepath: tmpPath,
-    originalFilename: safeName,
-    mimetype: response.headers['content-type'] || 'image/jpeg',
-    size: stats.size,
-  };
+async function uploadImage(sourceImageUrl, filenameHint = 'image.jpg') {
+  if (!sourceImageUrl) return null;
+  const fullUrl = sourceImageUrl.startsWith('http')
+    ? sourceImageUrl
+    : `${SOURCE_URL}${sourceImageUrl}`;
 
   try {
-    const uploaded = await strapi.plugin('upload').service('upload').upload({
-      data: {},
-      files: file,
+    const imgRes = await axios.get(fullUrl, { responseType: 'arraybuffer', timeout: 30000 });
+    const buffer = Buffer.from(imgRes.data);
+    const contentType = imgRes.headers['content-type'] || 'image/jpeg';
+    const safeName = filenameHint.replace(/[^a-zA-Z0-9._-]/g, '-');
+
+    const formData = new FormData();
+    formData.append('files', new Blob([buffer], { type: contentType }), safeName);
+
+    const uploadRes = await fetch(`${TARGET_URL}/api/upload`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${TARGET_TOKEN}` },
+      body: formData,
     });
-    return uploaded[0]?.id || null;
-  } finally {
-    await fs.promises.rm(tmpDir, { recursive: true, force: true });
+    const data = await uploadRes.json();
+    return data[0]?.id || null;
+  } catch (e) {
+    console.warn(`  图片上传失败 (${filenameHint}): ${e.message}`);
+    return null;
   }
 }
 
-async function upsertCategories(strapi) {
-  const zhCategories = await fetchAll('/categories', { locale: 'zh' });
-  const enCategories = await fetchAll('/categories', { locale: 'en' });
-  const enBySlug = new Map(enCategories.map((item) => [item.slug, item]));
-  const targetCategoryIds = new Map();
-  const categoryService = strapi.documents('api::category.category');
+async function syncCategories() {
+  console.log('\n--- 同步分类 ---');
+  const zhCats = await fetchAll(sourceApi, '/categories', { locale: 'zh' });
+  const enCats = await fetchAll(sourceApi, '/categories', { locale: 'en' });
+  const enBySlug = new Map(enCats.map((c) => [c.slug, c]));
 
-  for (const category of zhCategories) {
-    const existing = await categoryService.findMany({
-      locale: 'zh',
-      filters: { slug: { $eq: category.slug } },
-    });
+  const existingZh = await fetchAll(targetApi, '/categories', { locale: 'zh' });
+  const existingBySlug = new Map(existingZh.map((c) => [c.slug, c.documentId]));
 
-    let documentId;
-    if (existing.length > 0) {
-      documentId = existing[0].documentId;
-      await categoryService.update({
-        documentId,
-        locale: 'zh',
-        data: {
-          name: category.name,
-          slug: category.slug,
-          description: category.description,
-        },
-      });
+  const categoryMap = new Map();
+
+  for (const cat of zhCats) {
+    let documentId = existingBySlug.get(cat.slug);
+
+    if (documentId) {
+      await targetApi.put(
+        `/categories/${documentId}`,
+        { data: { name: cat.name, slug: cat.slug, description: cat.description } },
+        { params: { locale: 'zh', status: 'published' } }
+      );
     } else {
-      const created = await categoryService.create({
-        locale: 'zh',
-        data: {
-          name: category.name,
-          slug: category.slug,
-          description: category.description,
-        },
-      });
-      documentId = created.documentId;
+      const res = await targetApi.post(
+        '/categories',
+        { data: { name: cat.name, slug: cat.slug, description: cat.description, locale: 'zh' } },
+        { params: { status: 'published' } }
+      );
+      documentId = res.data.data.documentId;
     }
 
-    const enCategory = enBySlug.get(category.slug);
-    if (enCategory) {
-      await categoryService.update({
-        documentId,
-        locale: 'en',
-        data: {
-          name: enCategory.name,
-          description: enCategory.description,
-        },
-      });
+    const enCat = enBySlug.get(cat.slug);
+    if (enCat && documentId) {
+      await targetApi.put(
+        `/categories/${documentId}`,
+        { data: { name: enCat.name, description: enCat.description } },
+        { params: { locale: 'en', status: 'published' } }
+      );
     }
 
-    targetCategoryIds.set(category.slug, documentId);
+    categoryMap.set(cat.slug, documentId);
+    console.log(`  ✓ ${cat.name} (${cat.slug})`);
   }
 
-  return targetCategoryIds;
+  return categoryMap;
 }
 
-async function upsertArticles(strapi, categoryMap) {
-  const zhArticles = await fetchAll('/articles', { locale: 'zh', populate: '*' });
-  const enArticles = await fetchAll('/articles', { locale: 'en', populate: '*' });
-  const enBySlug = new Map(enArticles.map((item) => [item.slug, item]));
-  const articleService = strapi.documents('api::article.article');
+async function syncArticles(categoryMap) {
+  console.log('\n--- 同步文章 ---');
+  const zhArticles = await fetchAll(sourceApi, '/articles', { locale: 'zh', populate: '*' });
+  const enArticles = await fetchAll(sourceApi, '/articles', { locale: 'en', populate: '*' });
+  const enBySlug = new Map(enArticles.map((a) => [a.slug, a]));
+
+  const existingZh = await fetchAll(targetApi, '/articles', { locale: 'zh' });
+  const existingBySlug = new Map(existingZh.map((a) => [a.slug, a.documentId]));
 
   for (const article of zhArticles) {
-    const existing = await articleService.findMany({
-      locale: 'zh',
-      filters: { slug: { $eq: article.slug } },
-      populate: ['category', 'cover_image'],
-    });
+    let documentId = existingBySlug.get(article.slug);
 
-    const remoteImageUrl = article.cover_image?.url
-      ? article.cover_image.url.startsWith('http')
-        ? article.cover_image.url
-        : `${SOURCE_STRAPI_URL.replace(/\/$/, '')}${article.cover_image.url}`
-      : null;
-
-    const imageId = await uploadRemoteImageToTarget(strapi, remoteImageUrl, `${article.slug}.jpg`);
+    const imageId = await uploadImage(
+      article.cover_image?.url || null,
+      `${article.slug}.jpg`
+    );
 
     const zhPayload = {
       title: article.title,
@@ -152,94 +132,92 @@ async function upsertArticles(strapi, categoryMap) {
       reading_time: article.reading_time,
       featured: article.featured,
       published_date: article.published_date,
-      ...(categoryMap.get(article.category?.slug) && { category: categoryMap.get(article.category.slug) }),
+      ...(categoryMap.get(article.category?.slug) && {
+        category: categoryMap.get(article.category.slug),
+      }),
       ...(imageId && { cover_image: imageId }),
     };
 
-    let documentId;
-    if (existing.length > 0) {
-      documentId = existing[0].documentId;
-      await articleService.update({
-        documentId,
-        locale: 'zh',
-        status: 'published',
-        data: zhPayload,
+    if (documentId) {
+      await targetApi.put(`/articles/${documentId}`, { data: zhPayload }, {
+        params: { locale: 'zh', status: 'published' },
       });
     } else {
-      const created = await articleService.create({
-        locale: 'zh',
-        status: 'published',
-        data: zhPayload,
-      });
-      documentId = created.documentId;
+      const res = await targetApi.post(
+        '/articles',
+        { data: { ...zhPayload, locale: 'zh' } },
+        { params: { status: 'published' } }
+      );
+      documentId = res.data.data.documentId;
     }
 
     const enArticle = enBySlug.get(article.slug);
-    if (enArticle) {
-      await articleService.update({
-        documentId,
-        locale: 'en',
-        status: 'published',
-        data: {
-          title: enArticle.title,
-          excerpt: enArticle.excerpt,
-          content: enArticle.content,
-          reading_time: enArticle.reading_time,
-          published_date: enArticle.published_date,
+    if (enArticle && documentId) {
+      await targetApi.put(
+        `/articles/${documentId}`,
+        {
+          data: {
+            title: enArticle.title,
+            excerpt: enArticle.excerpt,
+            content: enArticle.content,
+            reading_time: enArticle.reading_time,
+            published_date: enArticle.published_date,
+          },
         },
-      });
+        { params: { locale: 'en', status: 'published' } }
+      );
     }
+
+    console.log(`  ✓ ${article.title}`);
   }
 }
 
-async function upsertHomepage(strapi, locale) {
-  const homepage = await fetchOne('/homepage', { locale, populate: 'sections' });
-  if (!homepage) return;
-
-  const homepageService = strapi.documents('api::homepage.homepage');
-  const existing = await homepageService.findMany({ locale });
-
-  if (existing.length > 0) {
-    await homepageService.update({
-      documentId: existing[0].documentId,
+async function syncHomepage() {
+  console.log('\n--- 同步首页 ---');
+  for (const locale of ['zh', 'en']) {
+    const homepage = await fetchOne(sourceApi, '/homepage', {
       locale,
-      status: 'published',
-      data: {
-        sections: homepage.sections || [],
-      },
+      populate: 'sections',
     });
-  } else {
-    await homepageService.create({
-      locale,
-      status: 'published',
-      data: {
-        sections: homepage.sections || [],
-      },
-    });
+    if (!homepage) {
+      console.log(`  跳过 ${locale} (无数据)`);
+      continue;
+    }
+
+    try {
+      await targetApi.put(
+        '/homepage',
+        { data: { sections: homepage.sections || [] } },
+        { params: { locale, status: 'published' } }
+      );
+      console.log(`  ✓ ${locale}`);
+    } catch {
+      await targetApi.post(
+        '/homepage',
+        { data: { sections: homepage.sections || [], locale } },
+        { params: { status: 'published' } }
+      );
+      console.log(`  ✓ ${locale} (新建)`);
+    }
   }
 }
 
 async function main() {
-  const strapi = createStrapi();
+  console.log('开始同步...');
+  console.log(`源:   ${SOURCE_URL}`);
+  console.log(`目标: ${TARGET_URL}`);
 
-  try {
-    await strapi.load();
+  const categoryMap = await syncCategories();
+  console.log(`分类完成: ${categoryMap.size} 条`);
 
-    console.log('开始同步本地内容到 Railway 数据库...');
-    const categoryMap = await upsertCategories(strapi);
-    console.log(`分类同步完成: ${categoryMap.size}`);
-    await upsertArticles(strapi, categoryMap);
-    console.log('文章同步完成');
-    await upsertHomepage(strapi, 'zh');
-    await upsertHomepage(strapi, 'en');
-    console.log('首页同步完成');
-    console.log('全部同步完成');
-  } finally {
-    await strapi.destroy();
-  }
+  await syncArticles(categoryMap);
+  console.log('文章完成');
+
+  await syncHomepage();
+  console.log('\n✅ 全部同步完成');
 }
 
-main().catch((error) => {
-  console.error(error.response?.data || error.message || error);
+main().catch((err) => {
+  console.error('\n❌ 同步失败:', err.response?.data || err.message);
   process.exit(1);
 });
