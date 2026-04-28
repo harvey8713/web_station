@@ -62,9 +62,13 @@ async function uploadImage(sourceImageUrl, filenameHint = 'image.jpg') {
   }
 }
 
+function stripNulls(obj) {
+  return Object.fromEntries(Object.entries(obj).filter(([, v]) => v != null));
+}
+
 async function syncCategories() {
   console.log('\n--- 同步分类 ---');
-  const zhCats = await fetchAll(sourceApi, '/categories', { locale: 'zh' });
+  const zhCats = (await fetchAll(sourceApi, '/categories', { locale: 'zh' })).filter((c) => c.slug);
   const enCats = await fetchAll(sourceApi, '/categories', { locale: 'en' });
   const enBySlug = new Map(enCats.map((c) => [c.slug, c]));
 
@@ -79,13 +83,13 @@ async function syncCategories() {
     if (documentId) {
       await targetApi.put(
         `/categories/${documentId}`,
-        { data: { name: cat.name, slug: cat.slug, description: cat.description } },
+        { data: stripNulls({ name: cat.name, slug: cat.slug, description: cat.description }) },
         { params: { locale: 'zh', status: 'published' } }
       );
     } else {
       const res = await targetApi.post(
         '/categories',
-        { data: { name: cat.name, slug: cat.slug, description: cat.description, locale: 'zh' } },
+        { data: stripNulls({ name: cat.name, slug: cat.slug, description: cat.description, locale: 'zh' }) },
         { params: { status: 'published' } }
       );
       documentId = res.data.data.documentId;
@@ -95,7 +99,7 @@ async function syncCategories() {
     if (enCat && documentId) {
       await targetApi.put(
         `/categories/${documentId}`,
-        { data: { name: enCat.name, description: enCat.description } },
+        { data: stripNulls({ name: enCat.name, description: enCat.description }) },
         { params: { locale: 'en', status: 'published' } }
       );
     }
@@ -109,7 +113,7 @@ async function syncCategories() {
 
 async function syncArticles(categoryMap) {
   console.log('\n--- 同步文章 ---');
-  const zhArticles = await fetchAll(sourceApi, '/articles', { locale: 'zh', populate: '*' });
+  const zhArticles = (await fetchAll(sourceApi, '/articles', { locale: 'zh', populate: '*' })).filter((a) => a.slug);
   const enArticles = await fetchAll(sourceApi, '/articles', { locale: 'en', populate: '*' });
   const enBySlug = new Map(enArticles.map((a) => [a.slug, a]));
 
@@ -124,7 +128,7 @@ async function syncArticles(categoryMap) {
       `${article.slug}.jpg`
     );
 
-    const zhPayload = {
+    const zhPayload = stripNulls({
       title: article.title,
       slug: article.slug,
       excerpt: article.excerpt,
@@ -136,7 +140,7 @@ async function syncArticles(categoryMap) {
         category: categoryMap.get(article.category.slug),
       }),
       ...(imageId && { cover_image: imageId }),
-    };
+    });
 
     if (documentId) {
       await targetApi.put(`/articles/${documentId}`, { data: zhPayload }, {
@@ -156,13 +160,13 @@ async function syncArticles(categoryMap) {
       await targetApi.put(
         `/articles/${documentId}`,
         {
-          data: {
+          data: stripNulls({
             title: enArticle.title,
             excerpt: enArticle.excerpt,
             content: enArticle.content,
             reading_time: enArticle.reading_time,
             published_date: enArticle.published_date,
-          },
+          }),
         },
         { params: { locale: 'en', status: 'published' } }
       );
