@@ -520,9 +520,9 @@ async function fetchAll(path, params = {}) {
 
 async function findBySlug(endpoint, slug) {
   for (const params of [
-    { locale: 'zh', 'filters[slug][$eq]': slug },
+    { locale: 'zh-CN', 'filters[slug][$eq]': slug },
     { 'filters[slug][$eq]': slug },
-    { locale: 'zh', 'filters[slug][$eq]': slug, status: 'draft' },
+    { locale: 'zh-CN', 'filters[slug][$eq]': slug, status: 'draft' },
   ]) {
     const items = await fetchAll(endpoint, params);
     if (items.length) return items[0];
@@ -543,12 +543,12 @@ async function seedCategories() {
     if (existing) {
       documentId = existing.documentId;
       await api.put(`/categories/${documentId}`, { data: cat.zh }, {
-        params: { locale: 'zh', status: 'published' },
+        params: { locale: 'zh-CN', status: 'published' },
       });
       console.log(`  更新: ${cat.zh.name}`);
     } else {
       try {
-        const res = await api.post('/categories', { data: { ...cat.zh, locale: 'zh' } }, {
+        const res = await api.post('/categories', { data: { ...cat.zh, locale: 'zh-CN' } }, {
           params: { status: 'published' },
         });
         documentId = res.data.data.documentId;
@@ -583,7 +583,7 @@ async function seedArticles(categoryMap) {
       ...article.zh,
       slug: article.slug,
       category: categoryMap.get(article.category),
-      locale: 'zh',
+      locale: 'zh-CN',
     };
 
     let documentId;
@@ -591,7 +591,7 @@ async function seedArticles(categoryMap) {
       documentId = existing.documentId;
       const { locale: _l, ...updateData } = zhData;
       await api.put(`/articles/${documentId}`, { data: updateData }, {
-        params: { locale: 'zh', status: 'published' },
+        params: { locale: 'zh-CN', status: 'published' },
       });
       console.log(`  更新: ${article.zh.title}`);
     } else {

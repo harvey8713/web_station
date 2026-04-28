@@ -3,6 +3,12 @@ import axios from 'axios';
 const API_URL = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1337';
 const API_TOKEN = process.env.NEXT_PUBLIC_STRAPI_API_TOKEN;
 
+// next-intl locale → Strapi locale（本地用 zh，Railway 用 zh-CN）
+function sl(locale: string): string {
+  if (locale === 'zh') return process.env.NEXT_PUBLIC_STRAPI_ZH_LOCALE || 'zh';
+  return locale;
+}
+
 const api = axios.create({
   baseURL: `${API_URL}/api`,
   headers: {
@@ -143,7 +149,7 @@ export async function getArticles(locale: string = 'en', page: number = 1, pageS
   try {
     const response = await api.get<ApiResponse<Article[]>>('/articles', {
       params: {
-        locale,
+        locale: sl(locale),
         'populate': '*',
         'pagination[page]': page,
         'pagination[pageSize]': pageSize,
@@ -162,7 +168,7 @@ export async function getArticleBySlug(slug: string, locale: string = 'en') {
   try {
     const response = await api.get<ApiResponse<Article[]>>('/articles', {
       params: {
-        locale,
+        locale: sl(locale),
         'filters[slug][$eq]': slug,
         'populate': '*',
       },
@@ -179,7 +185,7 @@ export async function getCategories(locale: string = 'en') {
   try {
     const response = await api.get<ApiResponse<Category[]>>('/categories', {
       params: {
-        locale,
+        locale: sl(locale),
       },
     });
     return response.data.data;
@@ -194,7 +200,7 @@ export async function getArticlesByCategory(categorySlug: string, locale: string
   try {
     const response = await api.get<ApiResponse<Article[]>>('/articles', {
       params: {
-        locale,
+        locale: sl(locale),
         'filters[category][slug][$eq]': categorySlug,
         'populate': '*',
         'pagination[page]': page,
@@ -213,7 +219,7 @@ export async function getArticlesByCategory(categorySlug: string, locale: string
 export async function getHomepage(locale: string = 'en'): Promise<PageSection[] | null> {
   try {
     const response = await api.get('/homepage', {
-      params: { locale, populate: 'sections' },
+      params: { locale: sl(locale), populate: 'sections' },
     });
     return response.data?.data?.sections ?? null;
   } catch {
