@@ -7,7 +7,6 @@ import HeroSection from '@/components/sections/HeroSection';
 import IntroSection from '@/components/sections/IntroSection';
 import ArticleGridSection from '@/components/sections/ArticleGridSection';
 import ContactBandSection from '@/components/sections/ContactBandSection';
-import FeaturedArticleSection from '@/components/sections/FeaturedArticleSection';
 import QuoteSection from '@/components/sections/QuoteSection';
 import BannerSection from '@/components/sections/BannerSection';
 
@@ -42,8 +41,6 @@ export default async function HomePage({
     wechatLabel: t('contact.wechat'),
   };
 
-  const featuredArticle = articlesData.data[0];
-
   const renderSection = (section: PageSection, index: number) => {
     switch (section.__component) {
       case 'sections.hero':
@@ -51,7 +48,7 @@ export default async function HomePage({
       case 'sections.intro':
         return <IntroSection key={index} data={section} locale={locale} defaults={introDefaults} />;
       case 'sections.featured-article':
-        return <FeaturedArticleSection key={index} data={section} locale={locale} article={featuredArticle} />;
+        return null;
       case 'sections.article-grid':
         return <ArticleGridSection key={index} data={section} locale={locale} articles={articlesData.data} defaults={gridDefaults} />;
       case 'sections.contact-band':

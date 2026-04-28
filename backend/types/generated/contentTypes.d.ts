@@ -567,6 +567,8 @@ export interface ApiHomepageHomepage extends Struct.SingleTypeSchema {
         'sections.featured-article',
         'sections.article-grid',
         'sections.contact-band',
+        'sections.quote',
+        'sections.banner',
       ]
     >;
     updatedAt: Schema.Attribute.DateTime;

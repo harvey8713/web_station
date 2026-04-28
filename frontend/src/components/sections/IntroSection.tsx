@@ -21,11 +21,11 @@ export default function IntroSection({data, locale, defaults}: Props) {
   const pb = data?.padding_bottom;
 
   const textBlock = (
-    <div className="px-[80px] py-20 flex flex-col justify-center">
+    <div className="px-[72px] lg:px-[80px] py-20 flex flex-col justify-center bg-[var(--bg)]">
       <p className="font-sans text-[10px] font-normal tracking-[0.3em] uppercase text-[var(--gold)] mb-8">
         {label}
       </p>
-      <h2 className="font-[family-name:var(--serif)] text-[clamp(36px,4vw,52px)] font-light leading-[1.2] mb-7">
+      <h2 className="font-[family-name:var(--serif)] text-[clamp(36px,4vw,52px)] font-light leading-[1.2] text-[var(--ink)] mb-7">
         {locale === 'zh' ? (
           <>{headingZh}</>
         ) : (
@@ -46,9 +46,15 @@ export default function IntroSection({data, locale, defaults}: Props) {
 
   const imageBlock = (
     <div
-      className="relative overflow-hidden bg-center bg-cover"
-      style={{backgroundImage: `url('${bgImage}')`}}
+      className="relative overflow-hidden"
+      style={{background: `linear-gradient(rgba(10,8,5,0.38), rgba(10,8,5,0.38)), url('${bgImage}') center/cover no-repeat`}}
     >
+      <span
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 font-[family-name:var(--serif)] font-light leading-none select-none pointer-events-none text-[rgba(255,255,255,0.04)]"
+        style={{fontSize: '320px'}}
+      >
+        M
+      </span>
       <span className="absolute bottom-10 left-10 font-sans text-[10px] tracking-[0.2em] uppercase text-[rgba(255,255,255,0.45)]">
         Magician in Jewellery · Est. 2024
       </span>
@@ -81,21 +87,45 @@ export default function IntroSection({data, locale, defaults}: Props) {
   if (layout === 'text-centered') {
     return (
       <section
-        className="px-[80px] py-24 flex flex-col items-center text-center"
+        className="relative bg-[var(--ink)] flex flex-col items-center text-center overflow-hidden"
         style={{
-          paddingTop: pt != null ? pt : undefined,
-          paddingBottom: pb != null ? pb : undefined,
+          paddingTop: pt != null ? pt : 96,
+          paddingBottom: pb != null ? pb : 96,
         }}
       >
-        <p className="font-sans text-[10px] font-normal tracking-[0.3em] uppercase text-[var(--gold)] mb-8">{label}</p>
-        <h2 className="font-[family-name:var(--serif)] text-[clamp(36px,4vw,52px)] font-light leading-[1.2] mb-7 max-w-[640px]">
-          {locale === 'zh' ? <>{headingZh}</> : <>Where <em className="italic">craft</em> meets brand intelligence</>}
-        </h2>
-        <div className="w-16 h-px bg-gradient-to-r from-transparent via-[var(--gold)] to-transparent my-6"></div>
-        <p className="font-sans text-[14px] font-light leading-[1.9] text-[var(--ink-muted)] mb-10 max-w-[560px]">{body}</p>
-        <Link href={linkUrl} className="font-sans text-[11px] font-medium tracking-[0.2em] uppercase no-underline text-[var(--ink)] border-b border-[var(--gold)] pb-[2px] transition-colors hover:text-[var(--gold)] inline-block w-fit">
-          {linkText}
-        </Link>
+        {/* top rule */}
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--gold)] to-transparent opacity-40" />
+
+        {/* decorative background letter */}
+        <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 font-[family-name:var(--serif)] text-[clamp(200px,30vw,360px)] font-light leading-none text-[rgba(255,255,255,0.03)] select-none pointer-events-none">
+          M
+        </span>
+
+        <div className="relative z-10 flex flex-col items-center px-6 md:px-[80px] max-w-[800px]">
+          <div className="flex items-center gap-4 mb-10">
+            <div className="w-10 h-px bg-[var(--gold)] opacity-60" />
+            <p className="font-sans text-[9px] font-medium tracking-[0.4em] uppercase text-[var(--gold)]">{label}</p>
+            <div className="w-10 h-px bg-[var(--gold)] opacity-60" />
+          </div>
+
+          <h2 className="font-[family-name:var(--serif)] text-[clamp(38px,5vw,64px)] font-light leading-[1.15] text-[var(--bg)] mb-8">
+            {locale === 'zh' ? <>{headingZh}</> : <>Where <em className="italic text-[var(--gold-light)]">craft</em> meets brand intelligence</>}
+          </h2>
+
+          <p className="font-sans text-[14px] font-light leading-[1.9] text-[rgba(250,250,248,0.55)] mb-10 max-w-[520px]">
+            {body}
+          </p>
+
+          <Link
+            href={linkUrl}
+            className="font-sans text-[10px] font-medium tracking-[0.25em] uppercase no-underline text-[var(--bg)] px-8 py-[12px] border border-[rgba(250,250,248,0.3)] transition-all hover:bg-[var(--bg)] hover:text-[var(--ink)] inline-block"
+          >
+            {linkText}
+          </Link>
+        </div>
+
+        {/* bottom rule */}
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--gold)] to-transparent opacity-40" />
       </section>
     );
   }

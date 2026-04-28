@@ -45,3 +45,15 @@ Thumbs.db
 *.db
 *.sqlite
 *.sqlite3
+
+# Local Claude settings
+.claude/settings.local.json
+
+# Local reference assets
+article.png
+article1.png
+article2.png
+article3.png
+article4.png
+网站参考*.png
+design-v1.html

@@ -15,7 +15,8 @@ export default async function AboutPage({
       <Navigation />
 
       <main className="pt-[120px] pb-20">
-        <div className="max-w-[900px] mx-auto px-[60px]">
+        <div className="flex justify-center px-6 md:px-[60px]">
+        <div className="w-full max-w-[860px]">
           <div className="mb-16">
             <p className="font-sans text-[10px] font-normal tracking-[0.3em] uppercase text-[var(--gold)] mb-8">
               {t('intro.label')}
@@ -53,6 +54,7 @@ export default async function AboutPage({
               </p>
             </div>
           </div>
+        </div>
         </div>
       </main>
 

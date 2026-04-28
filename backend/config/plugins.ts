@@ -3,7 +3,7 @@ import type { Core } from '@strapi/strapi';
 const config = ({ env }: Core.Config.Shared.ConfigParams): Core.Config.Plugin => {
   const plugins: Core.Config.Plugin = {
     'ai-content-generator': {
-      enabled: true,
+      enabled: false,
       resolve: './src/plugins/ai-content-generator',
     },
   };

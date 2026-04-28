@@ -1,6 +1,6 @@
 'use client';
 
-import {useTranslations} from 'next-intl';
+import {useTranslations, useLocale} from 'next-intl';
 import {Link, usePathname} from '@/i18n/routing';
 
 export default function Navigation() {
@@ -42,21 +42,18 @@ export default function Navigation() {
 
 function LanguageToggle() {
   const pathname = usePathname();
+  const locale = useLocale();
+
+  const base = "font-sans text-[10px] font-medium tracking-[0.12em] uppercase px-[10px] py-[5px] transition-all no-underline";
+  const active = "bg-[var(--ink)] text-[var(--bg)]";
+  const inactive = "text-[var(--ink-muted)] hover:bg-[var(--ink)] hover:text-[var(--bg)]";
 
   return (
     <div className="flex gap-0 border border-[var(--ink)]">
-      <Link
-        href={pathname}
-        locale="en"
-        className="bg-none border-none cursor-pointer font-sans text-[10px] font-medium tracking-[0.12em] uppercase px-[10px] py-[5px] text-[var(--ink-muted)] transition-all hover:bg-[var(--ink)] hover:text-[var(--bg)]"
-      >
+      <Link href={pathname} locale="en" className={`${base} ${locale === 'en' ? active : inactive}`}>
         EN
       </Link>
-      <Link
-        href={pathname}
-        locale="zh"
-        className="bg-none border-none cursor-pointer font-sans text-[10px] font-medium tracking-[0.12em] uppercase px-[10px] py-[5px] text-[var(--ink-muted)] transition-all hover:bg-[var(--ink)] hover:text-[var(--bg)]"
-      >
+      <Link href={pathname} locale="zh" className={`${base} ${locale === 'zh' ? active : inactive}`}>
         中文
       </Link>
     </div>
