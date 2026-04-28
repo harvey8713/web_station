@@ -518,12 +518,16 @@ async function fetchAll(path, params = {}) {
   return res.data.data || [];
 }
 
-async function findBySlug(endpoint, slug, locale = 'zh') {
-  const items = await fetchAll(endpoint, {
-    locale,
-    'filters[slug][$eq]': slug,
-  });
-  return items[0] || null;
+async function findBySlug(endpoint, slug) {
+  for (const params of [
+    { locale: 'zh', 'filters[slug][$eq]': slug },
+    { 'filters[slug][$eq]': slug },
+    { locale: 'zh', 'filters[slug][$eq]': slug, status: 'draft' },
+  ]) {
+    const items = await fetchAll(endpoint, params);
+    if (items.length) return items[0];
+  }
+  return null;
 }
 
 // ─── 同步逻辑 ────────────────────────────────────────────────────────────────
@@ -533,7 +537,7 @@ async function seedCategories() {
   const categoryMap = new Map();
 
   for (const cat of CATEGORIES) {
-    let existing = await findBySlug('/categories', cat.zh.slug, 'zh');
+    let existing = await findBySlug('/categories', cat.zh.slug);
 
     let documentId;
     if (existing) {
@@ -543,11 +547,20 @@ async function seedCategories() {
       });
       console.log(`  更新: ${cat.zh.name}`);
     } else {
-      const res = await api.post('/categories', { data: { ...cat.zh, locale: 'zh' } }, {
-        params: { status: 'published' },
-      });
-      documentId = res.data.data.documentId;
-      console.log(`  创建: ${cat.zh.name}`);
+      try {
+        const res = await api.post('/categories', { data: { ...cat.zh, locale: 'zh' } }, {
+          params: { status: 'published' },
+        });
+        documentId = res.data.data.documentId;
+        console.log(`  创建: ${cat.zh.name}`);
+      } catch (err) {
+        if (err.response?.data?.error?.message?.includes('unique')) {
+          existing = await findBySlug('/categories', cat.zh.slug);
+          if (!existing) throw err;
+          documentId = existing.documentId;
+          console.log(`  已存在: ${cat.zh.name}`);
+        } else throw err;
+      }
     }
 
     await api.put(`/categories/${documentId}`, { data: { ...cat.en, slug: cat.zh.slug } }, {
@@ -564,7 +577,7 @@ async function seedArticles(categoryMap) {
   console.log('\n--- 创建文章 ---');
 
   for (const article of ARTICLES) {
-    let existing = await findBySlug('/articles', article.slug, 'zh');
+    let existing = await findBySlug('/articles', article.slug);
 
     const zhData = {
       ...article.zh,
@@ -582,11 +595,20 @@ async function seedArticles(categoryMap) {
       });
       console.log(`  更新: ${article.zh.title}`);
     } else {
-      const res = await api.post('/articles', { data: zhData }, {
-        params: { status: 'published' },
-      });
-      documentId = res.data.data.documentId;
-      console.log(`  创建: ${article.zh.title}`);
+      try {
+        const res = await api.post('/articles', { data: zhData }, {
+          params: { status: 'published' },
+        });
+        documentId = res.data.data.documentId;
+        console.log(`  创建: ${article.zh.title}`);
+      } catch (err) {
+        if (err.response?.data?.error?.message?.includes('unique')) {
+          existing = await findBySlug('/articles', article.slug);
+          if (!existing) throw err;
+          documentId = existing.documentId;
+          console.log(`  已存在: ${article.zh.title}`);
+        } else throw err;
+      }
     }
 
     await api.put(`/articles/${documentId}`, { data: { ...article.en, slug: article.slug } }, {
