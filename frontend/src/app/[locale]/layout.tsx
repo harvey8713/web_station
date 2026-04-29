@@ -3,6 +3,8 @@ import {getMessages} from 'next-intl/server';
 import {notFound} from 'next/navigation';
 import {routing} from '@/i18n/routing';
 import { Geist, Geist_Mono } from "next/font/google";
+import {getGlobal} from '@/lib/api';
+import {GlobalProvider} from '@/components/GlobalProvider';
 import '../globals.css';
 
 const geistSans = Geist({
@@ -32,7 +34,10 @@ export default async function LocaleLayout({
     notFound();
   }
 
-  const messages = await getMessages();
+  const [messages, global] = await Promise.all([
+    getMessages(),
+    getGlobal(locale),
+  ]);
 
   return (
     <html
@@ -41,7 +46,9 @@ export default async function LocaleLayout({
     >
       <body className="min-h-full flex flex-col">
         <NextIntlClientProvider messages={messages}>
-          {children}
+          <GlobalProvider value={global}>
+            {children}
+          </GlobalProvider>
         </NextIntlClientProvider>
       </body>
     </html>

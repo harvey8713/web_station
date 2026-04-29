@@ -1,0 +1,36 @@
+{
+  "kind": "singleType",
+  "collectionName": "globals",
+  "info": {
+    "singularName": "global",
+    "pluralName": "globals",
+    "displayName": "Global Settings"
+  },
+  "options": { "draftAndPublish": false },
+  "pluginOptions": { "i18n": { "localized": true } },
+  "attributes": {
+    "nav_about": {
+      "type": "string",
+      "pluginOptions": { "i18n": { "localized": true } }
+    },
+    "nav_insights": {
+      "type": "string",
+      "pluginOptions": { "i18n": { "localized": true } }
+    },
+    "nav_profiles": {
+      "type": "string",
+      "pluginOptions": { "i18n": { "localized": true } }
+    },
+    "nav_culture": {
+      "type": "string",
+      "pluginOptions": { "i18n": { "localized": true } }
+    },
+    "footer_copyright": {
+      "type": "string",
+      "pluginOptions": { "i18n": { "localized": true } }
+    },
+    "instagram_url": { "type": "string" },
+    "wechat_id": { "type": "string" },
+    "linkedin_url": { "type": "string" }
+  }
+}

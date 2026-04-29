@@ -227,6 +227,29 @@ export async function getHomepage(locale: string = 'en'): Promise<PageSection[] 
   }
 }
 
+export interface GlobalSettings {
+  nav_about?: string;
+  nav_insights?: string;
+  nav_profiles?: string;
+  nav_culture?: string;
+  footer_copyright?: string;
+  instagram_url?: string;
+  wechat_id?: string;
+  linkedin_url?: string;
+}
+
+// 获取全局设置
+export async function getGlobal(locale: string = 'en'): Promise<GlobalSettings | null> {
+  try {
+    const response = await api.get('/global', {
+      params: { locale: sl(locale) },
+    });
+    return response.data?.data ?? null;
+  } catch {
+    return null;
+  }
+}
+
 // 获取图片完整URL
 export function getImageUrl(url?: string): string {
   if (!url) return '/placeholder.jpg';

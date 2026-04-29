@@ -2,16 +2,18 @@
 
 import {useTranslations, useLocale} from 'next-intl';
 import {Link, usePathname} from '@/i18n/routing';
+import {useGlobal} from '@/components/GlobalProvider';
 
 export default function Navigation() {
   const t = useTranslations('nav');
+  const g = useGlobal();
   const pathname = usePathname();
 
   const navLinks = [
-    {href: '/about', label: t('about')},
-    {href: '/insights', label: t('insights')},
-    {href: '/profiles', label: t('profiles')},
-    {href: '/culture', label: t('culture')},
+    {href: '/about',    label: g?.nav_about    ?? t('about')},
+    {href: '/insights', label: g?.nav_insights ?? t('insights')},
+    {href: '/profiles', label: g?.nav_profiles ?? t('profiles')},
+    {href: '/culture',  label: g?.nav_culture  ?? t('culture')},
   ];
 
   return (
