@@ -10,6 +10,8 @@ import ContactBandSection from '@/components/sections/ContactBandSection';
 import QuoteSection from '@/components/sections/QuoteSection';
 import BannerSection from '@/components/sections/BannerSection';
 
+export const revalidate = 300;
+
 export default async function HomePage({
   params
 }: {

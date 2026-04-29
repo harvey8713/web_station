@@ -5,6 +5,8 @@ import Footer from '@/components/Footer';
 import Image from 'next/image';
 import {marked} from 'marked';
 
+export const revalidate = 300;
+
 export default async function ArticlePage({
   params
 }: {

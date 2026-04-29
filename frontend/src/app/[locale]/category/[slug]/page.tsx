@@ -4,6 +4,8 @@ import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import ArticleCard from '@/components/ArticleCard';
 
+export const revalidate = 300;
+
 export default async function CategoryPage({
   params
 }: {
