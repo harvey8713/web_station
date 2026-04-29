@@ -41,16 +41,20 @@ module.exports = {
       ...providerOptions,
     };
 
-    const client = new OSS({
+    console.log('[OSS Provider] Initializing with bucket:', config.bucket, 'region:', config.region);
+
+    const ossOptions = {
       region: config.region,
       accessKeyId: config.accessKeyId,
       accessKeySecret: config.accessKeySecret,
       bucket: config.bucket,
-      endpoint: config.endpoint,
       secure: config.secure !== false,
       internal: config.internal === true,
       timeout: normalizeTimeout(config.timeout),
-    });
+    };
+    if (config.endpoint) ossOptions.endpoint = config.endpoint;
+
+    const client = new OSS(ossOptions);
 
     const assignFileUrl = (file, key) => {
       const baseUrl = getBaseUrl(config);
@@ -79,6 +83,7 @@ module.exports = {
       }
 
       assignFileUrl(file, key);
+      console.log('[OSS Provider] Upload success:', file.url);
     };
 
     return {

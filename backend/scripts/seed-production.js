@@ -55,7 +55,7 @@ async function warmUp() {
 async function uploadImage(imageUrl, filenameHint = 'cover.jpg') {
   if (!imageUrl) return null;
   try {
-    const imgRes = await axios.get(imageUrl, { responseType: 'arraybuffer', timeout: 30000 });
+    const imgRes = await axios.get(imageUrl, { responseType: 'arraybuffer', timeout: 60000 });
     const buffer = Buffer.from(imgRes.data);
     const contentType = imgRes.headers['content-type'] || 'image/jpeg';
     const safeName = filenameHint.replace(/[^a-zA-Z0-9._-]/g, '-');
@@ -66,7 +66,7 @@ async function uploadImage(imageUrl, filenameHint = 'cover.jpg') {
 
     const uploadRes = await axios.post(`${TARGET_URL}/api/upload`, form, {
       headers: { Authorization: `Bearer ${TARGET_TOKEN}`, ...form.getHeaders() },
-      timeout: 30000,
+      timeout: 60000,
     });
     return uploadRes.data[0]?.id || null;
   } catch (e) {
@@ -235,7 +235,7 @@ These details aren't meant to be seen at first glance, but to be discovered in a
   },
   {
     slug: 'jade-cultural-significance-modern-design',
-    cover_image_url: 'https://picsum.photos/seed/jade-jewelry/1200/900',
+    cover_image_url: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=800&auto=format&fit=crop',
     category: 'cultural-narrative',
     zh: {
       title: '玉的文化重量：从传统符号到当代珠宝叙事',
@@ -312,7 +312,7 @@ If your brand hopes to tell the story of Chinese jade culture in international m
   },
   {
     slug: 'diamond-grading-guide-4cs',
-    cover_image_url: 'https://picsum.photos/seed/diamond-guide/1200/900',
+    cover_image_url: 'https://images.unsplash.com/photo-1583292650898-7d22cd27ca6f?w=800&auto=format&fit=crop',
     category: 'materials-craft',
     zh: {
       title: '钻石4C评级深度解析：消费者真正需要懂的那些事',
