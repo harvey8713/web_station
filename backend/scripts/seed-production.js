@@ -54,6 +54,7 @@ async function warmUp() {
 
 async function uploadImage(imageUrl, filenameHint = 'cover.jpg') {
   if (!imageUrl) return null;
+  await new Promise(r => setTimeout(r, 3000)); // 避免 CDN 限流
   try {
     const imgRes = await axios.get(imageUrl, { responseType: 'arraybuffer', timeout: 60000 });
     const buffer = Buffer.from(imgRes.data);

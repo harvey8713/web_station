@@ -65,21 +65,25 @@ module.exports = {
 
     const putObject = async (file) => {
       const key = getFileKey(file, config);
+      console.log('[OSS Provider] Uploading key:', key, 'hasStream:', !!file.stream, 'hasBuffer:', !!file.buffer, 'mime:', file.mime);
 
-      if (file.stream) {
-        await client.putStream(key, file.stream, {
-          headers: {
-            'Content-Type': file.mime,
-          },
-        });
-      } else if (file.buffer) {
-        await client.put(key, file.buffer, {
-          headers: {
-            'Content-Type': file.mime,
-          },
-        });
-      } else {
-        throw new Error('Upload provider expected file.stream or file.buffer');
+      try {
+        if (file.stream) {
+          const result = await client.putStream(key, file.stream, {
+            headers: { 'Content-Type': file.mime },
+          });
+          console.log('[OSS Provider] putStream result:', result?.res?.status);
+        } else if (file.buffer) {
+          const result = await client.put(key, file.buffer, {
+            headers: { 'Content-Type': file.mime },
+          });
+          console.log('[OSS Provider] put result:', result?.res?.status);
+        } else {
+          throw new Error('Upload provider expected file.stream or file.buffer');
+        }
+      } catch (err) {
+        console.error('[OSS Provider] Upload error:', err.message, err.code, err.status);
+        throw err;
       }
 
       assignFileUrl(file, key);
