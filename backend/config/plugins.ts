@@ -13,6 +13,8 @@ const config = ({ env }: Core.Config.Shared.ConfigParams): Core.Config.Plugin =>
   const ossAccessKeyId = env('OSS_ACCESS_KEY_ID');
   const ossAccessKeySecret = env('OSS_ACCESS_KEY_SECRET');
 
+  console.log('[plugins.ts] OSS vars check — bucket:', !!ossBucket, 'keyId:', !!ossAccessKeyId, 'secret:', !!ossAccessKeySecret);
+
   if (ossBucket && ossAccessKeyId && ossAccessKeySecret) {
     plugins.upload = {
       config: {
