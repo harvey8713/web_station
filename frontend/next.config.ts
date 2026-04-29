@@ -22,7 +22,11 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: '*.aliyuncs.com',
+        hostname: 'my-jewelry-site-assets.oss-cn-hongkong.aliyuncs.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.aliyuncs.com',
       },
     ],
   },
