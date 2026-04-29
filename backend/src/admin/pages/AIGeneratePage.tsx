@@ -200,7 +200,7 @@ export default function AIGeneratePage() {
         <div style={s.card}>
           <div style={s.cardTitle}>✅ 文章已生成，已保存为草稿</div>
           <a
-            href={`${base}/${result.documentId}?locale=zh`}
+            href={`${base}/${result.documentId}?locale=zh-CN`}
             style={s.link}
             target="_blank"
             rel="noopener noreferrer"

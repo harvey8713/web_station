@@ -100,7 +100,7 @@ Output strictly in JSON format:
           reading_time: readingTime(zh.content, 'zh'),
           published_date: new Date().toISOString(),
         },
-        locale: 'zh',
+        locale: 'zh-CN',
         status: 'draft',
       });
 
