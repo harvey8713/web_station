@@ -23,8 +23,10 @@ const config = ({ env }: Core.Config.Shared.ConfigParams): Core.Config.Plugin =>
           region: env('OSS_REGION'),
           bucket: ossBucket,
           endpoint: env('OSS_ENDPOINT'),
-          secure: true,
-          timeout: 60000,
+          baseUrl: env('OSS_BASE_URL', undefined),
+          uploadPath: env('OSS_UPLOAD_PATH', undefined),
+          secure: env.bool('OSS_SECURE', true),
+          timeout: env.int('OSS_TIMEOUT', 60000),
         },
         actionOptions: {
           upload: {},
