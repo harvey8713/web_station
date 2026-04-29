@@ -19,7 +19,7 @@ if (!TARGET_URL || !TARGET_TOKEN) {
 const api = axios.create({
   baseURL: `${TARGET_URL}/api`,
   headers: { Authorization: `Bearer ${TARGET_TOKEN}`, 'Content-Type': 'application/json' },
-  timeout: 30000,
+  timeout: 90000,
 });
 
 async function withRetry(fn, label, retries = 3) {
@@ -28,7 +28,7 @@ async function withRetry(fn, label, retries = 3) {
       return await fn();
     } catch (e) {
       const code = e.code || e.response?.status;
-      if (i < retries && (code === 'ECONNRESET' || code === 'ETIMEDOUT' || code === 'ECONNREFUSED' || code === 503)) {
+      if (i < retries && (code === 'ECONNRESET' || code === 'ETIMEDOUT' || code === 'ECONNABORTED' || code === 'ECONNREFUSED' || code === 503 || code === 502)) {
         console.warn(`  ${label} 重试 (${i}/${retries - 1})...`);
         await new Promise(r => setTimeout(r, 2000 * i));
       } else {
@@ -571,9 +571,11 @@ Sustainable jewelry is not a PR gimmick; it's the baseline for industry competit
 // ─── 工具函数 ────────────────────────────────────────────────────────────────
 
 async function fetchAll(path, params = {}) {
-  const res = await api.get(path, {
-    params: { 'pagination[pageSize]': 100, ...params },
-  });
+  const res = await withRetry(
+    () => api.get(path, { params: { 'pagination[pageSize]': 100, ...params } }),
+    `读取 ${path}`,
+    4
+  );
   return res.data.data || [];
 }
 
@@ -601,15 +603,23 @@ async function seedCategories() {
     let documentId;
     if (existing) {
       documentId = existing.documentId;
-      await api.put(`/categories/${documentId}`, { data: cat.zh }, {
-        params: { locale: 'zh-CN', status: 'published' },
-      });
+      await withRetry(
+        () => api.put(`/categories/${documentId}`, { data: cat.zh }, {
+          params: { locale: 'zh-CN', status: 'published' },
+        }),
+        `更新分类 ${cat.zh.slug}`,
+        4
+      );
       console.log(`  更新: ${cat.zh.name}`);
     } else {
       try {
-        const res = await api.post('/categories', { data: { ...cat.zh, locale: 'zh-CN' } }, {
-          params: { status: 'published' },
-        });
+        const res = await withRetry(
+          () => api.post('/categories', { data: { ...cat.zh, locale: 'zh-CN' } }, {
+            params: { status: 'published' },
+          }),
+          `创建分类 ${cat.zh.slug}`,
+          4
+        );
         documentId = res.data.data.documentId;
         console.log(`  创建: ${cat.zh.name}`);
       } catch (err) {
@@ -622,9 +632,13 @@ async function seedCategories() {
       }
     }
 
-    await api.put(`/categories/${documentId}`, { data: { ...cat.en, slug: cat.zh.slug } }, {
-      params: { locale: 'en', status: 'published' },
-    });
+    await withRetry(
+      () => api.put(`/categories/${documentId}`, { data: { ...cat.en, slug: cat.zh.slug } }, {
+        params: { locale: 'en', status: 'published' },
+      }),
+      `更新分类英文 ${cat.zh.slug}`,
+      4
+    );
 
     categoryMap.set(cat.zh.slug, documentId);
   }
@@ -653,15 +667,23 @@ async function seedArticles(categoryMap) {
     if (existing) {
       documentId = existing.documentId;
       const { locale: _l, ...updateData } = zhData;
-      await api.put(`/articles/${documentId}`, { data: updateData }, {
-        params: { locale: 'zh-CN', status: 'published' },
-      });
+      await withRetry(
+        () => api.put(`/articles/${documentId}`, { data: updateData }, {
+          params: { locale: 'zh-CN', status: 'published' },
+        }),
+        `更新文章 ${article.slug}`,
+        4
+      );
       console.log(`  更新: ${article.zh.title}`);
     } else {
       try {
-        const res = await api.post('/articles', { data: zhData }, {
-          params: { status: 'published' },
-        });
+        const res = await withRetry(
+          () => api.post('/articles', { data: zhData }, {
+            params: { status: 'published' },
+          }),
+          `创建文章 ${article.slug}`,
+          4
+        );
         documentId = res.data.data.documentId;
         console.log(`  创建: ${article.zh.title}`);
       } catch (err) {
@@ -674,15 +696,21 @@ async function seedArticles(categoryMap) {
       }
     }
 
-    await api.put(`/articles/${documentId}`, { data: { ...article.en, slug: article.slug } }, {
-      params: { locale: 'en', status: 'published' },
-    });
+    await withRetry(
+      () => api.put(`/articles/${documentId}`, { data: { ...article.en, slug: article.slug } }, {
+        params: { locale: 'en', status: 'published' },
+      }),
+      `更新文章英文 ${article.slug}`,
+      4
+    );
   }
 }
 
 async function main() {
   console.log('开始写入生产数据...');
   console.log(`目标: ${TARGET_URL}\n`);
+
+  await warmUp();
 
   const categoryMap = await seedCategories();
   console.log(`\n分类完成: ${categoryMap.size} 个`);
