@@ -39,6 +39,86 @@ function readingTime(text: string, lang: 'zh' | 'en') {
 }
 
 export default {
+  async translate(ctx: any) {
+    const { documentId } = ctx.request.body as { documentId?: string };
+
+    if (!documentId?.trim()) {
+      return ctx.badRequest('请提供 documentId');
+    }
+
+    // Fetch the zh-CN version
+    const zhDoc = await (strapi as any).documents('api::article.article').findOne({
+      documentId,
+      locale: 'zh-CN',
+      status: 'draft',
+    });
+
+    if (!zhDoc) {
+      return ctx.notFound('未找到该文章的中文版本');
+    }
+
+    const { title, excerpt, content } = zhDoc;
+
+    if (!title && !content) {
+      return ctx.badRequest('中文版本内容为空，请先填写标题和正文');
+    }
+
+    try {
+      const enUserPrompt = `Translate the following JSON content into professional English. Maintain the jewellery brand tone: minimalist, architectural, artistic. Keep the same Markdown structure in the content field.
+
+\`\`\`json
+${JSON.stringify({ title, excerpt, content }, null, 2)}
+\`\`\`
+
+Output strictly in JSON format:
+\`\`\`json
+{
+  "title": "English title",
+  "excerpt": "English excerpt (may be null if original is null)",
+  "content": "English content in Markdown (may be null if original is null)"
+}
+\`\`\``;
+
+      const enRaw = await callQwen([{ role: 'user', content: enUserPrompt }]);
+      const en = extractJson(enRaw);
+
+      // Save English localization
+      await (strapi as any).documents('api::article.article').update({
+        documentId,
+        data: {
+          title: en.title,
+          excerpt: en.excerpt ?? null,
+          content: en.content ?? null,
+          reading_time: en.content ? readingTime(en.content, 'en') : zhDoc.reading_time,
+        },
+        locale: 'en',
+        status: 'draft',
+      });
+
+      // Publish both locales
+      await (strapi as any).documents('api::article.article').publish({
+        documentId,
+        locale: 'zh-CN',
+      });
+      await (strapi as any).documents('api::article.article').publish({
+        documentId,
+        locale: 'en',
+      });
+
+      ctx.body = {
+        success: true,
+        data: {
+          documentId,
+          zhTitle: title,
+          enTitle: en.title,
+        },
+      };
+    } catch (error: any) {
+      (strapi as any).log.error('AI 翻译失败:', error.message);
+      return ctx.badRequest(error.message || 'AI 翻译失败，请重试');
+    }
+  },
+
   async generate(ctx: any) {
     const { prompt } = ctx.request.body as { prompt?: string };
 

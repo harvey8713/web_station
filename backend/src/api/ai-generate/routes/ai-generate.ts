@@ -9,5 +9,14 @@ export default {
         policies: [],
       },
     },
+    {
+      method: 'POST',
+      path: '/ai-translate',
+      handler: 'ai-generate.translate',
+      config: {
+        auth: false,
+        policies: [],
+      },
+    },
   ],
 };
