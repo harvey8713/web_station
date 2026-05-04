@@ -46,12 +46,20 @@ export default {
       return ctx.badRequest('请提供 documentId');
     }
 
-    // Fetch the zh-CN version
-    const zhDoc = await (strapi as any).documents('api::article.article').findOne({
+    // Fetch the zh-CN version — try draft first, fall back to published
+    let zhDoc = await (strapi as any).documents('api::article.article').findOne({
       documentId,
       locale: 'zh-CN',
       status: 'draft',
     });
+
+    if (!zhDoc) {
+      zhDoc = await (strapi as any).documents('api::article.article').findOne({
+        documentId,
+        locale: 'zh-CN',
+        status: 'published',
+      });
+    }
 
     if (!zhDoc) {
       return ctx.notFound('未找到该文章的中文版本');

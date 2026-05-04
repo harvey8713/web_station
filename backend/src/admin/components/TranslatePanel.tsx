@@ -108,10 +108,11 @@ function TranslatePanelContent({ documentId }: { documentId: string }) {
 // DescriptionComponent: called as a React component by Strapi, must return
 // { title, content } (an object), not JSX. Hooks are allowed here.
 export default function TranslatePanel() {
-  const { id: documentId } = useParams<{ id: string }>();
+  const { id: documentId, slug } = useParams<{ id: string; slug: string }>();
 
-  // Returning null tells Strapi not to render this panel
+  // Only show on Article edit pages, not create pages or other content types
   if (!documentId || documentId === 'create') return null;
+  if (slug && slug !== 'api::article.article') return null;
 
   return {
     title: 'AI 翻译',
