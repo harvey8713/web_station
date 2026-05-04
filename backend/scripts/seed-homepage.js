@@ -108,13 +108,30 @@ const EN_SECTIONS = [
   },
 ];
 
+async function getLocales(token) {
+  const res = await axios.get(`${BASE_URL}/i18n/locales`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.data.map((l) => l.code);
+}
+
 async function run() {
   console.log(`Connecting to ${BASE_URL}...`);
   const token = await login();
   console.log('✔ Logged in');
 
-  await putHomepage(token, 'zh', ZH_SECTIONS);
-  await publishHomepage(token, 'zh');
+  const locales = await getLocales(token);
+  console.log('Available locales:', locales);
+
+  // Support both 'zh' (local dev) and 'zh-CN' (Railway)
+  const zhLocale = locales.find((l) => l === 'zh-CN') || locales.find((l) => l === 'zh');
+  if (!zhLocale) {
+    console.error('❌ No Chinese locale found:', locales);
+    process.exit(1);
+  }
+
+  await putHomepage(token, zhLocale, ZH_SECTIONS);
+  await publishHomepage(token, zhLocale);
 
   await putHomepage(token, 'en', EN_SECTIONS);
   await publishHomepage(token, 'en');

@@ -2,6 +2,9 @@ import axios from 'axios';
 
 const QWEN_URL = 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions';
 
+// Railway uses 'zh-CN', local dev SQLite uses 'zh'
+const ZH_LOCALE = process.env.ZH_LOCALE || 'zh-CN';
+
 async function callQwen(messages: Array<{ role: string; content: string }>, maxTokens = 3000) {
   const apiKey = process.env.QWEN_API_KEY;
   if (!apiKey) throw new Error('QWEN_API_KEY 未配置');
@@ -46,17 +49,16 @@ export default {
       return ctx.badRequest('请提供 documentId');
     }
 
-    // Fetch the zh-CN version — try draft first, fall back to published
+    // Fetch the zh version — try draft first, fall back to published
     let zhDoc = await (strapi as any).documents('api::article.article').findOne({
       documentId,
-      locale: 'zh-CN',
+      locale: ZH_LOCALE,
       status: 'draft',
     });
-
     if (!zhDoc) {
       zhDoc = await (strapi as any).documents('api::article.article').findOne({
         documentId,
-        locale: 'zh-CN',
+        locale: ZH_LOCALE,
         status: 'published',
       });
     }
@@ -106,7 +108,7 @@ Output strictly in JSON format:
       // Publish both locales
       await (strapi as any).documents('api::article.article').publish({
         documentId,
-        locale: 'zh-CN',
+        locale: ZH_LOCALE,
       });
       await (strapi as any).documents('api::article.article').publish({
         documentId,
@@ -188,7 +190,7 @@ Output strictly in JSON format:
           reading_time: readingTime(zh.content, 'zh'),
           published_date: new Date().toISOString(),
         },
-        locale: 'zh-CN',
+        locale: ZH_LOCALE,
         status: 'draft',
       });
 
