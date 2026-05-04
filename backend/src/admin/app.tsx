@@ -1,6 +1,6 @@
 import type { StrapiApp } from '@strapi/strapi/admin';
 import { Magic, Information } from '@strapi/icons';
-import TranslatePanel from './components/TranslatePanel';
+import { TranslatePanel } from './components/TranslatePanel';
 
 export default {
   config: {
@@ -40,8 +40,10 @@ export default {
       permissions: [],
     });
 
-    // Inject translate panel into article edit view sidebar (Strapi 5 API)
-    const contentManager = app.getPlugin('content-manager');
-    (contentManager as any).addEditViewSidePanel([TranslatePanel]);
+    // Register translate panel in article edit view sidebar
+    app.getPlugin('content-manager').apis.addEditViewSidePanel((panels: any[]) => [
+      ...panels,
+      TranslatePanel,
+    ]);
   },
 };

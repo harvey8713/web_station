@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useFetchClient } from '@strapi/strapi/admin';
-import { useParams } from 'react-router-dom';
 
 const s: Record<string, React.CSSProperties> = {
   btn: {
@@ -49,7 +48,6 @@ const s: Record<string, React.CSSProperties> = {
   },
 };
 
-// Inner component — owns all state and hooks, renders JSX normally
 function TranslatePanelContent({ documentId }: { documentId: string }) {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{ zhTitle: string; enTitle: string } | null>(null);
@@ -105,17 +103,16 @@ function TranslatePanelContent({ documentId }: { documentId: string }) {
   );
 }
 
-// DescriptionComponent: called as a React component by Strapi, must return
-// { title, content } (an object), not JSX. Hooks are allowed here.
-export default function TranslatePanel() {
-  const { id: documentId, slug } = useParams<{ id: string; slug: string }>();
-
-  // Only show on Article edit pages, not create pages or other content types
-  if (!documentId || documentId === 'create') return null;
-  if (slug && slug !== 'api::article.article') return null;
+// Strapi 5 DescriptionComponent: receives props from Strapi, returns { title, content } or null
+const TranslatePanel = ({ model, documentId, document }: any) => {
+  // Only show for articles, and only when editing an existing document
+  if (model !== 'api::article.article') return null;
+  if (!documentId || !document) return null;
 
   return {
     title: 'AI 翻译',
     content: <TranslatePanelContent documentId={documentId} />,
-  } as any;
-}
+  };
+};
+
+export { TranslatePanel };
