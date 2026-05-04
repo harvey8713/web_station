@@ -49,25 +49,18 @@ const s: Record<string, React.CSSProperties> = {
   },
 };
 
-// TranslatePanel is a DescriptionComponent: it's a React component that returns
-// { title, content } (an object) instead of JSX. Strapi renders the returned
-// content inside a collapsible sidebar panel.
-export default function TranslatePanel() {
+// Inner component — owns all state and hooks, renders JSX normally
+function TranslatePanelContent({ documentId }: { documentId: string }) {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{ zhTitle: string; enTitle: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
-
   const { post } = useFetchClient();
-  const { id: documentId } = useParams<{ id: string }>();
-
-  if (!documentId || documentId === 'create') return null;
 
   const handleTranslate = async () => {
     if (loading) return;
     setLoading(true);
     setError(null);
     setResult(null);
-
     try {
       const response = await post('/api/ai-translate', { documentId });
       const body = response.data as any;
@@ -88,7 +81,7 @@ export default function TranslatePanel() {
     }
   };
 
-  const content = (
+  return (
     <div>
       <button
         style={{ ...s.btn, ...(loading ? s.btnDisabled : {}) }}
@@ -110,7 +103,18 @@ export default function TranslatePanel() {
       {error && <div style={s.error}>❌ {error}</div>}
     </div>
   );
+}
 
-  // Return description object as required by Strapi 5 DescriptionComponent API
-  return { title: 'AI 翻译', content } as any;
+// DescriptionComponent: called as a React component by Strapi, must return
+// { title, content } (an object), not JSX. Hooks are allowed here.
+export default function TranslatePanel() {
+  const { id: documentId } = useParams<{ id: string }>();
+
+  // Returning null tells Strapi not to render this panel
+  if (!documentId || documentId === 'create') return null;
+
+  return {
+    title: 'AI 翻译',
+    content: <TranslatePanelContent documentId={documentId} />,
+  } as any;
 }
