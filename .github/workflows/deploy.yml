@@ -1,0 +1,70 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      - name: Build backend
+        working-directory: backend
+        run: npm ci && npm run build
+        env:
+          NODE_ENV: production
+          NODE_OPTIONS: --max-old-space-size=4096
+          APP_KEYS: ${{ secrets.APP_KEYS }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          ADMIN_JWT_SECRET: ${{ secrets.ADMIN_JWT_SECRET }}
+          API_TOKEN_SALT: ${{ secrets.API_TOKEN_SALT }}
+          OSS_ACCESS_KEY_ID: ${{ secrets.OSS_ACCESS_KEY_ID }}
+          OSS_ACCESS_KEY_SECRET: ${{ secrets.OSS_ACCESS_KEY_SECRET }}
+          OSS_BUCKET: ${{ secrets.OSS_BUCKET }}
+          OSS_REGION: ${{ secrets.OSS_REGION }}
+
+      - name: Build frontend
+        working-directory: frontend
+        run: npm ci && npm run build
+        env:
+          NEXT_PUBLIC_STRAPI_API_URL: ${{ secrets.STRAPI_URL }}
+          NEXT_PUBLIC_STRAPI_ZH_LOCALE: zh-CN
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.ECS_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan 47.242.252.133 >> ~/.ssh/known_hosts
+
+      - name: Sync backend dist to ECS
+        run: rsync -az --delete backend/dist/ root@47.242.252.133:/root/web_station/backend/dist/
+
+      - name: Sync frontend build to ECS
+        run: |
+          rsync -az --delete frontend/.next/standalone/ root@47.242.252.133:/root/web_station/frontend/.next/standalone/
+          rsync -az --delete frontend/.next/static/ root@47.242.252.133:/root/web_station/frontend/.next/static/
+
+      - name: Restart services on ECS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 47.242.252.133
+          username: root
+          key: ${{ secrets.ECS_SSH_KEY }}
+          script: |
+            cp -r /root/web_station/frontend/.next/static /root/web_station/frontend/.next/standalone/.next/
+            cp -r /root/web_station/frontend/public /root/web_station/frontend/.next/standalone/ 2>/dev/null || true
+            pm2 restart strapi 2>/dev/null || pm2 start --name strapi --cwd /root/web_station/backend npm -- start
+            pm2 restart nextjs 2>/dev/null || pm2 start --name nextjs node -- /root/web_station/frontend/.next/standalone/server.js
+            pm2 save
