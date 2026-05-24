@@ -41,12 +41,13 @@ jobs:
           NEXT_PUBLIC_STRAPI_API_URL: ${{ secrets.STRAPI_URL }}
           NEXT_PUBLIC_STRAPI_ZH_LOCALE: zh-CN
 
-      - name: Setup SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.ECS_SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan 47.242.252.133 >> ~/.ssh/known_hosts
+      - name: Setup SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.ECS_SSH_KEY }}
+
+      - name: Add ECS to known hosts
+        run: ssh-keyscan 47.242.252.133 >> ~/.ssh/known_hosts
 
       - name: Sync backend dist to ECS
         run: rsync -az --delete backend/dist/ root@47.242.252.133:/root/web_station/backend/dist/
