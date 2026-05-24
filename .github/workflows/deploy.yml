@@ -49,12 +49,12 @@ jobs:
           ssh-keyscan 47.242.252.133 >> ~/.ssh/known_hosts
 
       - name: Sync backend dist to ECS
-        run: rsync -az --delete backend/dist/ root@47.242.252.133:/root/web_station/backend/dist/
+        run: rsync -az --delete --mkpath backend/dist/ root@47.242.252.133:/root/web_station/backend/dist/
 
       - name: Sync frontend build to ECS
         run: |
-          rsync -az --delete frontend/.next/standalone/ root@47.242.252.133:/root/web_station/frontend/.next/standalone/
-          rsync -az --delete frontend/.next/static/ root@47.242.252.133:/root/web_station/frontend/.next/static/
+          rsync -az --delete --mkpath frontend/.next/standalone/ root@47.242.252.133:/root/web_station/frontend/.next/standalone/
+          rsync -az --delete --mkpath frontend/.next/static/ root@47.242.252.133:/root/web_station/frontend/.next/static/
 
       - name: Restart services on ECS
         uses: appleboy/ssh-action@v1.0.3
