@@ -31,6 +31,16 @@
     },
     "instagram_url": { "type": "string" },
     "wechat_id": { "type": "string" },
-    "linkedin_url": { "type": "string" }
+    "linkedin_url": { "type": "string" },
+    "nav_links": {
+      "type": "component",
+      "repeatable": true,
+      "component": "navigation.nav-link",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    }
   }
 }

@@ -582,6 +582,12 @@ export interface ApiGlobalGlobal extends Struct.SingleTypeSchema {
           localized: true;
         };
       }>;
+    nav_links: Schema.Attribute.Component<'navigation.nav-link', true> &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     nav_profiles: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {

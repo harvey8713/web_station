@@ -9,12 +9,14 @@ export default function Navigation() {
   const g = useGlobal();
   const pathname = usePathname();
 
-  const navLinks = [
-    {href: '/about',    label: g?.nav_about    ?? t('about')},
-    {href: '/insights', label: g?.nav_insights ?? t('insights')},
-    {href: '/profiles', label: g?.nav_profiles ?? t('profiles')},
-    {href: '/culture',  label: g?.nav_culture  ?? t('culture')},
-  ];
+  const navLinks = g?.nav_links?.length
+    ? g.nav_links.map((link) => ({ href: link.href, label: link.label }))
+    : [
+        {href: '/about',    label: g?.nav_about    ?? t('about')},
+        {href: '/insights', label: g?.nav_insights ?? t('insights')},
+        {href: '/profiles', label: g?.nav_profiles ?? t('profiles')},
+        {href: '/culture',  label: g?.nav_culture  ?? t('culture')},
+      ];
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-[60px] py-7 bg-[rgba(250,250,248,0.92)] backdrop-blur-[12px] border-b border-transparent transition-colors">

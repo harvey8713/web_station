@@ -1,5 +1,23 @@
 import type { Schema, Struct } from '@strapi/strapi';
 
+export interface NavigationNavLink extends Struct.ComponentSchema {
+  collectionName: 'components_navigation_nav_links';
+  info: {
+    displayName: 'Nav Link';
+    icon: 'link';
+  };
+  attributes: {
+    href: Schema.Attribute.String & Schema.Attribute.Required;
+    label: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+  };
+}
+
 export interface SectionsArticleGrid extends Struct.ComponentSchema {
   collectionName: 'components_sections_article_grids';
   info: {
@@ -143,6 +161,7 @@ export interface SectionsQuote extends Struct.ComponentSchema {
 declare module '@strapi/strapi' {
   export module Public {
     export interface ComponentSchemas {
+      'navigation.nav-link': NavigationNavLink;
       'sections.article-grid': SectionsArticleGrid;
       'sections.banner': SectionsBanner;
       'sections.contact-band': SectionsContactBand;

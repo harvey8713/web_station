@@ -227,11 +227,17 @@ export async function getHomepage(locale: string = 'en'): Promise<PageSection[] 
   }
 }
 
+export interface NavLink {
+  label: string;
+  href: string;
+}
+
 export interface GlobalSettings {
   nav_about?: string;
   nav_insights?: string;
   nav_profiles?: string;
   nav_culture?: string;
+  nav_links?: NavLink[];
   footer_copyright?: string;
   instagram_url?: string;
   wechat_id?: string;
@@ -242,7 +248,7 @@ export interface GlobalSettings {
 export async function getGlobal(locale: string = 'en'): Promise<GlobalSettings | null> {
   try {
     const response = await api.get('/global', {
-      params: { locale: sl(locale) },
+      params: { locale: sl(locale), populate: 'nav_links' },
     });
     return response.data?.data ?? null;
   } catch {
