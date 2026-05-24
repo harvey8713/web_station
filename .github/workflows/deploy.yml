@@ -57,14 +57,11 @@ jobs:
           rsync -az --delete --mkpath frontend/.next/static/ root@47.242.252.133:/root/web_station/frontend/.next/static/
 
       - name: Restart services on ECS
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: 47.242.252.133
-          username: root
-          key: ${{ secrets.ECS_SSH_KEY }}
-          script: |
-            cp -r /root/web_station/frontend/.next/static /root/web_station/frontend/.next/standalone/.next/
-            cp -r /root/web_station/frontend/public /root/web_station/frontend/.next/standalone/ 2>/dev/null || true
-            pm2 restart strapi 2>/dev/null || pm2 start --name strapi --cwd /root/web_station/backend npm -- start
-            pm2 restart nextjs 2>/dev/null || pm2 start --name nextjs node -- /root/web_station/frontend/.next/standalone/server.js
-            pm2 save
+        run: |
+          ssh -o StrictHostKeyChecking=no root@47.242.252.133 bash << 'ENDSSH'
+          cp -r /root/web_station/frontend/.next/static /root/web_station/frontend/.next/standalone/.next/ 2>/dev/null || true
+          cp -r /root/web_station/frontend/public /root/web_station/frontend/.next/standalone/ 2>/dev/null || true
+          pm2 restart strapi 2>/dev/null || pm2 start --name strapi --cwd /root/web_station/backend npm -- start
+          pm2 restart nextjs 2>/dev/null || pm2 start --name nextjs node -- /root/web_station/frontend/.next/standalone/server.js
+          pm2 save
+          ENDSSH
