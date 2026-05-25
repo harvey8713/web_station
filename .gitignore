@@ -49,6 +49,9 @@ Thumbs.db
 # Local Claude settings
 .claude/settings.local.json
 
+# Local images (not for repo)
+catier*.jpg
+
 # Local reference assets
 article.png
 article1.png
