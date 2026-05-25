@@ -100,6 +100,7 @@ Output strictly in JSON format:
           excerpt: en.excerpt ?? null,
           content: en.content ?? null,
           reading_time: en.content ? readingTime(en.content, 'en') : zhDoc.reading_time,
+          slug: zhDoc.slug,
         },
         locale: 'en',
         status: 'draft',
