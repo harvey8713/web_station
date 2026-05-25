@@ -14,7 +14,7 @@ export default function Navigation() {
     : [
         {href: '/about',    label: g?.nav_about    ?? t('about')},
         {href: '/insights', label: g?.nav_insights ?? t('insights')},
-        {href: '/profiles', label: g?.nav_profiles ?? t('profiles')},
+        {href: '/designer', label: g?.nav_profiles ?? t('designer')},
         {href: '/culture',  label: g?.nav_culture  ?? t('culture')},
       ];
 
