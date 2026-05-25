@@ -75,6 +75,7 @@ export default {
 
     try {
       const enUserPrompt = `Translate the following JSON content into professional English. Maintain the jewellery brand tone: minimalist, architectural, artistic. Keep the same Markdown structure in the content field.
+IMPORTANT: Preserve all Markdown image syntax \`![alt](url)\` exactly as-is — do not translate, modify, or remove image URLs.
 
 \`\`\`json
 ${JSON.stringify({ title, excerpt, content }, null, 2)}
@@ -101,6 +102,8 @@ Output strictly in JSON format:
           content: en.content ?? null,
           reading_time: en.content ? readingTime(en.content, 'en') : zhDoc.reading_time,
           slug: zhDoc.slug,
+          ...(zhDoc.cover_image && { cover_image: zhDoc.cover_image.id }),
+          ...(zhDoc.category && { category: zhDoc.category.id }),
         },
         locale: 'en',
         status: 'draft',
