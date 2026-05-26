@@ -8,7 +8,6 @@ const config = ({ env }: Core.Config.Shared.ConfigParams): Core.Config.Plugin =>
     },
     'ckeditor': {
       enabled: true,
-      resolve: './node_modules/@_sh/strapi-plugin-ckeditor',
     },
   };
 
