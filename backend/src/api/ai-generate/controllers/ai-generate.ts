@@ -26,102 +26,77 @@ function extractJson(text: string) {
   return JSON.parse(raw);
 }
 
-// ── Blocks ↔ Markdown 互转 ────────────────────────────────────────────────────
+// ── Markdown ↔ HTML 互转 ──────────────────────────────────────────────────────
 
-function parseInline(text: string): any[] {
-  const children: any[] = [];
-  const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`)/);
-  for (const part of parts) {
-    if (!part) continue;
-    if (part.startsWith('**') && part.endsWith('**')) {
-      children.push({ type: 'text', text: part.slice(2, -2), bold: true });
-    } else if (part.startsWith('*') && part.endsWith('*')) {
-      children.push({ type: 'text', text: part.slice(1, -1), italic: true });
-    } else if (part.startsWith('`') && part.endsWith('`')) {
-      children.push({ type: 'text', text: part.slice(1, -1), code: true });
-    } else {
-      children.push({ type: 'text', text: part });
-    }
-  }
-  return children.length > 0 ? children : [{ type: 'text', text: '' }];
+function escapeHtml(text: string): string {
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-function markdownToBlocks(md: string): any[] {
-  if (!md?.trim()) return [{ type: 'paragraph', children: [{ type: 'text', text: '' }] }];
-  const blocks: any[] = [];
+function inlineToHtml(text: string): string {
+  return escapeHtml(text)
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+    .replace(/`([^`]+)`/g, '<code>$1</code>');
+}
+
+function markdownToHtml(md: string): string {
+  if (!md?.trim()) return '';
   const lines = md.split('\n');
+  let html = '';
   let i = 0;
 
   while (i < lines.length) {
     const line = lines[i];
-
     if (!line.trim()) { i++; continue; }
 
-    // Headings
     if (line.startsWith('### ')) {
-      blocks.push({ type: 'heading', level: 3, children: parseInline(line.slice(4).trim()) });
+      html += `<h3>${inlineToHtml(line.slice(4).trim())}</h3>\n`;
       i++; continue;
     }
     if (line.startsWith('## ')) {
-      blocks.push({ type: 'heading', level: 2, children: parseInline(line.slice(3).trim()) });
+      html += `<h2>${inlineToHtml(line.slice(3).trim())}</h2>\n`;
       i++; continue;
     }
     if (line.startsWith('# ')) {
-      blocks.push({ type: 'heading', level: 1, children: parseInline(line.slice(2).trim()) });
+      html += `<h1>${inlineToHtml(line.slice(2).trim())}</h1>\n`;
       i++; continue;
     }
-
-    // Divider
     if (/^[-*_]{3,}$/.test(line.trim())) {
-      blocks.push({ type: 'divider', children: [{ type: 'text', text: '' }] });
+      html += '<hr/>\n';
       i++; continue;
     }
-
-    // Blockquote
     if (line.startsWith('> ')) {
       const quoteLines: string[] = [];
       while (i < lines.length && lines[i].startsWith('> ')) {
         quoteLines.push(lines[i].slice(2));
         i++;
       }
-      blocks.push({ type: 'quote', children: parseInline(quoteLines.join(' ')) });
+      html += `<blockquote><p>${inlineToHtml(quoteLines.join(' '))}</p></blockquote>\n`;
       continue;
     }
-
-    // Image
     const imgMatch = line.trim().match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
     if (imgMatch) {
-      blocks.push({
-        type: 'image',
-        image: { url: imgMatch[2], alternativeText: imgMatch[1] || '' },
-        children: [{ type: 'text', text: imgMatch[1] || '' }],
-      });
+      html += `<figure class="image"><img src="${imgMatch[2]}" alt="${escapeHtml(imgMatch[1])}"/></figure>\n`;
       i++; continue;
     }
-
-    // Unordered list
     if (/^[-*] /.test(line)) {
-      const items: any[] = [];
+      html += '<ul>\n';
       while (i < lines.length && /^[-*] /.test(lines[i])) {
-        items.push({ type: 'list-item', children: parseInline(lines[i].slice(2)) });
+        html += `<li>${inlineToHtml(lines[i].slice(2))}</li>\n`;
         i++;
       }
-      blocks.push({ type: 'list', format: 'unordered', children: items });
+      html += '</ul>\n';
       continue;
     }
-
-    // Ordered list
     if (/^\d+\. /.test(line)) {
-      const items: any[] = [];
+      html += '<ol>\n';
       while (i < lines.length && /^\d+\. /.test(lines[i])) {
-        items.push({ type: 'list-item', children: parseInline(lines[i].replace(/^\d+\. /, '')) });
+        html += `<li>${inlineToHtml(lines[i].replace(/^\d+\. /, ''))}</li>\n`;
         i++;
       }
-      blocks.push({ type: 'list', format: 'ordered', children: items });
+      html += '</ol>\n';
       continue;
     }
-
-    // Paragraph — collect consecutive plain lines
     const paraLines: string[] = [];
     while (
       i < lines.length &&
@@ -137,70 +112,54 @@ function markdownToBlocks(md: string): any[] {
       i++;
     }
     if (paraLines.length > 0) {
-      blocks.push({ type: 'paragraph', children: parseInline(paraLines.join(' ')) });
+      html += `<p>${inlineToHtml(paraLines.join(' '))}</p>\n`;
     }
   }
 
-  return blocks.length > 0 ? blocks : [{ type: 'paragraph', children: [{ type: 'text', text: '' }] }];
+  return html.trim();
 }
 
-function inlineToText(children: any[]): string {
-  if (!children) return '';
-  return children.map(child => {
-    if (child.type !== 'text') return '';
-    let text = child.text || '';
-    if (child.bold) text = `**${text}**`;
-    if (child.italic) text = `*${text}*`;
-    if (child.code) text = `\`${text}\``;
-    return text;
-  }).join('');
+function stripInlineTags(html: string): string {
+  return html
+    .replace(/<strong>(.*?)<\/strong>/g, '**$1**')
+    .replace(/<em>(.*?)<\/em>/g, '*$1*')
+    .replace(/<code>(.*?)<\/code>/g, '`$1`')
+    .replace(/<[^>]+>/g, '');
 }
 
-function blocksToMarkdown(blocks: any[]): string {
-  if (!blocks || !Array.isArray(blocks)) return '';
-  const lines: string[] = [];
-  for (const block of blocks) {
-    switch (block.type) {
-      case 'paragraph':
-        lines.push(inlineToText(block.children)); lines.push(''); break;
-      case 'heading':
-        lines.push(`${'#'.repeat(block.level || 2)} ${inlineToText(block.children)}`); lines.push(''); break;
-      case 'quote':
-        lines.push(`> ${inlineToText(block.children)}`); lines.push(''); break;
-      case 'divider':
-        lines.push('---'); lines.push(''); break;
-      case 'image': {
-        const alt = block.image?.alternativeText || '';
-        const url = block.image?.url || '';
-        lines.push(`![${alt}](${url})`);
-        const caption = block.children?.[0]?.text;
-        if (caption && caption !== alt) lines.push(`*${caption}*`);
-        lines.push(''); break;
-      }
-      case 'list':
-        for (const item of block.children || []) {
-          const prefix = block.format === 'ordered' ? '1.' : '-';
-          lines.push(`${prefix} ${inlineToText(item.children)}`);
-        }
-        lines.push(''); break;
-    }
-  }
-  return lines.join('\n').trim();
+function htmlToMarkdown(html: string): string {
+  if (!html) return '';
+  return html
+    .replace(/<h1[^>]*>(.*?)<\/h1>/gi, (_, c) => `# ${stripInlineTags(c)}\n\n`)
+    .replace(/<h2[^>]*>(.*?)<\/h2>/gi, (_, c) => `## ${stripInlineTags(c)}\n\n`)
+    .replace(/<h3[^>]*>(.*?)<\/h3>/gi, (_, c) => `### ${stripInlineTags(c)}\n\n`)
+    .replace(/<blockquote[^>]*>([\s\S]*?)<\/blockquote>/gi, (_, c) => `> ${stripInlineTags(c).trim()}\n\n`)
+    .replace(/<hr\s*\/?>/gi, '---\n\n')
+    .replace(/<figure[^>]*>\s*<img[^>]*src="([^"]*)"[^>]*alt="([^"]*)"[^>]*\/?>\s*(?:<figcaption>([\s\S]*?)<\/figcaption>\s*)?<\/figure>/gi,
+      (_, url, alt) => `![${alt}](${url})\n\n`)
+    .replace(/<ul[^>]*>([\s\S]*?)<\/ul>/gi, (_, c) =>
+      c.replace(/<li[^>]*>(.*?)<\/li>/gi, (_: string, item: string) => `- ${stripInlineTags(item)}\n`) + '\n')
+    .replace(/<ol[^>]*>([\s\S]*?)<\/ol>/gi, (_, c) => {
+      let n = 0;
+      return c.replace(/<li[^>]*>(.*?)<\/li>/gi, (_: string, item: string) => `${++n}. ${stripInlineTags(item)}\n`) + '\n';
+    })
+    .replace(/<p[^>]*>([\s\S]*?)<\/p>/gi, (_, c) => `${stripInlineTags(c)}\n\n`)
+    .replace(/<[^>]+>/g, '')
+    .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
 }
 
-function blocksToPlainText(blocks: any[]): string {
-  if (!blocks) return '';
-  return blocks.map(block => {
-    if (block.type === 'image' || block.type === 'divider') return '';
-    return inlineToText(block.children || []);
-  }).join(' ');
+function htmlToPlainText(html: string): string {
+  if (!html) return '';
+  return html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
 // ── Reading time ──────────────────────────────────────────────────────────────
 
-function readingTime(content: any[] | string, lang: 'zh' | 'en') {
-  const text = Array.isArray(content) ? blocksToPlainText(content) : (content || '');
-  const cleaned = text.replace(/[#*>`\-\s]/g, '');
+function readingTime(content: string, lang: 'zh' | 'en') {
+  const text = htmlToPlainText(content || '');
+  const cleaned = text.replace(/\s/g, '');
   return Math.max(1, Math.ceil(cleaned.length / (lang === 'zh' ? 300 : 800)));
 }
 
@@ -224,10 +183,7 @@ export default {
     const { title, excerpt } = zhDoc;
     if (!title) return ctx.badRequest('中文版本内容为空，请先填写标题');
 
-    // Convert blocks → markdown for translation
-    const contentMd = Array.isArray(zhDoc.content)
-      ? blocksToMarkdown(zhDoc.content)
-      : (zhDoc.content || '');
+    const contentMd = htmlToMarkdown(zhDoc.content || '');
 
     try {
       const enUserPrompt = `Translate the following JSON content into professional English. Maintain the jewellery brand tone: minimalist, architectural, artistic. Keep the same Markdown structure in the content field.
@@ -248,7 +204,7 @@ Output strictly in JSON format:
 
       const enRaw = await callQwen([{ role: 'user', content: enUserPrompt }]);
       const en = extractJson(enRaw);
-      const enBlocks = en.content ? markdownToBlocks(en.content) : null;
+      const enHtml = en.content ? markdownToHtml(en.content) : null;
       const enSlug = zhDoc.slug ||
         (en.title as string).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
@@ -257,8 +213,8 @@ Output strictly in JSON format:
         data: {
           title: en.title,
           excerpt: en.excerpt ?? null,
-          content: enBlocks,
-          reading_time: enBlocks ? readingTime(enBlocks, 'en') : zhDoc.reading_time,
+          content: enHtml,
+          reading_time: enHtml ? readingTime(enHtml, 'en') : zhDoc.reading_time,
           slug: enSlug,
           ...(zhDoc.cover_image && { cover_image: zhDoc.cover_image.id }),
           ...(zhDoc.category && { category: zhDoc.category.id }),
@@ -292,9 +248,7 @@ Output strictly in JSON format:
     if (!doc) return ctx.notFound('未找到该文章');
     if (!doc.content) return ctx.badRequest('文章内容为空');
 
-    const contentMd = Array.isArray(doc.content)
-      ? blocksToMarkdown(doc.content)
-      : doc.content;
+    const contentMd = htmlToMarkdown(doc.content);
 
     try {
       const prompt = `你是专业的珠宝编辑平台内容编辑。对以下文章正文进行排版优化：
@@ -314,11 +268,11 @@ ${contentMd}`;
 
       const raw = await callQwen([{ role: 'user', content: prompt }], 4000);
       const cleaned = raw.replace(/^```(?:markdown)?\s*/i, '').replace(/\s*```$/i, '').trim();
-      const formattedBlocks = markdownToBlocks(cleaned);
+      const formattedHtml = markdownToHtml(cleaned);
 
       await (strapi as any).documents('api::article.article').update({
         documentId,
-        data: { content: formattedBlocks },
+        data: { content: formattedHtml },
         locale: ZH_LOCALE,
         status: 'draft',
       });
@@ -357,7 +311,7 @@ ${prompt}
         { role: 'user', content: zhUserPrompt },
       ]);
       const zh = extractJson(zhRaw);
-      const zhBlocks = zh.content ? markdownToBlocks(zh.content) : null;
+      const zhHtml = zh.content ? markdownToHtml(zh.content) : null;
 
       const enUserPrompt = `Translate the following JSON content into professional English. Maintain the jewellery brand tone: minimalist, architectural, artistic. Keep the same Markdown structure.
 
@@ -376,14 +330,14 @@ Output strictly in JSON format:
 
       const enRaw = await callQwen([{ role: 'user', content: enUserPrompt }]);
       const en = extractJson(enRaw);
-      const enBlocks = en.content ? markdownToBlocks(en.content) : null;
+      const enHtml = en.content ? markdownToHtml(en.content) : null;
 
       const zhDoc = await (strapi as any).documents('api::article.article').create({
         data: {
           title: zh.title,
           excerpt: zh.excerpt,
-          content: zhBlocks,
-          reading_time: zhBlocks ? readingTime(zhBlocks, 'zh') : 5,
+          content: zhHtml,
+          reading_time: zhHtml ? readingTime(zhHtml, 'zh') : 5,
           published_date: new Date().toISOString(),
         },
         locale: ZH_LOCALE,
@@ -395,8 +349,8 @@ Output strictly in JSON format:
         data: {
           title: en.title,
           excerpt: en.excerpt,
-          content: enBlocks,
-          reading_time: enBlocks ? readingTime(enBlocks, 'en') : 5,
+          content: enHtml,
+          reading_time: enHtml ? readingTime(enHtml, 'en') : 5,
         },
         locale: 'en',
         status: 'draft',

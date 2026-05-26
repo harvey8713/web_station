@@ -39,7 +39,8 @@
       }
     },
     "content": {
-      "type": "blocks",
+      "type": "customField",
+      "customField": "plugin::ckeditor.CKEditor",
       "pluginOptions": {
         "i18n": {
           "localized": true

@@ -124,21 +124,45 @@ body {
   margin: 3rem 0;
 }
 
-.article-content figure {
-  margin: 2.5rem 0;
+/* CKEditor image blocks */
+.article-content .image {
+  margin: 2.5rem auto;
+  display: table;
+  clear: both;
 }
 
-.article-content figure img {
-  width: 100%;
+.article-content .image img {
   height: auto;
   display: block;
+  max-width: 100%;
 }
 
-.article-content figcaption {
+.article-content .image.image-style-align-left {
+  float: left;
+  margin-right: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.article-content .image.image-style-align-right {
+  float: right;
+  margin-left: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.article-content .image.image-style-side {
+  float: right;
+  margin-left: 1.5rem;
+  max-width: 50%;
+}
+
+.article-content figcaption,
+.article-content .image figcaption {
   text-align: center;
   font-size: 12px;
   color: var(--ink-muted);
-  margin-top: 0.75rem;
+  margin-top: 0.5rem;
   font-style: italic;
   letter-spacing: 0.03em;
+  display: table-caption;
+  caption-side: bottom;
 }

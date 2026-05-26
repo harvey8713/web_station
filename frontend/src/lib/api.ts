@@ -24,7 +24,7 @@ export interface Article {
   title: string;
   slug: string;
   excerpt: string;
-  content: any[];
+  content: string;
   publishedAt: string;
   reading_time: number;
   cover_image?: {

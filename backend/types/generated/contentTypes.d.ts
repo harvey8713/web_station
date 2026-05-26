@@ -448,7 +448,7 @@ export interface ApiArticleArticle extends Struct.CollectionTypeSchema {
   };
   attributes: {
     category: Schema.Attribute.Relation<'manyToOne', 'api::category.category'>;
-    content: Schema.Attribute.Blocks &
+    content: Schema.Attribute.CustomField<'plugin::ckeditor.CKEditor'> &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
           localized: true;
