@@ -3,7 +3,7 @@ import {getArticleBySlug, getImageUrl} from '@/lib/api';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import Image from 'next/image';
-import {marked} from 'marked';
+import BlocksContent from '@/components/BlocksContent';
 
 export const revalidate = 300;
 
@@ -18,8 +18,6 @@ export default async function ArticlePage({
   if (!article) {
     notFound();
   }
-
-  const htmlContent = marked.parse(article.content || '') as string;
 
   return (
     <>
@@ -59,10 +57,7 @@ export default async function ArticlePage({
               <span>{article.reading_time} {locale === 'zh' ? '分钟阅读' : 'min read'}</span>
             </div>
 
-            <div
-              className="article-content"
-              dangerouslySetInnerHTML={{__html: htmlContent}}
-            />
+            <BlocksContent blocks={article.content} />
 
             <div className="mt-16 pt-10 border-t border-[rgba(0,0,0,0.08)] flex items-center gap-4">
               <div className="w-8 h-px bg-[var(--gold)]"></div>

@@ -18,6 +18,12 @@ const s: Record<string, React.CSSProperties> = {
     gap: '6px',
     transition: 'opacity 0.2s',
     boxSizing: 'border-box' as const,
+    marginBottom: '8px',
+  },
+  btnSecondary: {
+    background: '#f0f0ff',
+    color: '#4945ff',
+    border: '1px solid #c0bfff',
   },
   btnDisabled: { opacity: 0.5, cursor: 'not-allowed' },
   success: {
@@ -41,29 +47,46 @@ const s: Record<string, React.CSSProperties> = {
     lineHeight: 1.5,
   },
   hint: {
-    marginTop: '8px',
+    marginTop: '4px',
+    marginBottom: '12px',
     fontSize: '11px',
     color: '#a5a5ba',
     lineHeight: 1.5,
   },
+  notice: {
+    padding: '10px 12px',
+    background: '#fafafa',
+    border: '1px solid #e0e0e0',
+    borderRadius: '4px',
+    fontSize: '12px',
+    color: '#666',
+    lineHeight: 1.5,
+  },
 };
 
-function TranslatePanelContent({ documentId }: { documentId: string }) {
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<{ zhTitle: string; enTitle: string } | null>(null);
+function TranslatePanelContent({ documentId }: { documentId: string | null }) {
+  const [translateLoading, setTranslateLoading] = useState(false);
+  const [formatLoading, setFormatLoading] = useState(false);
+  const [translateResult, setTranslateResult] = useState<{ zhTitle: string; enTitle: string } | null>(null);
+  const [formatResult, setFormatResult] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { post } = useFetchClient();
 
+  if (!documentId) {
+    return <div style={s.notice}>💡 保存文章后即可使用 AI 功能。</div>;
+  }
+
   const handleTranslate = async () => {
-    if (loading) return;
-    setLoading(true);
+    if (translateLoading) return;
+    setTranslateLoading(true);
     setError(null);
-    setResult(null);
+    setTranslateResult(null);
+    setFormatResult(false);
     try {
       const response = await post('/api/ai-translate', { documentId });
       const body = response.data as any;
       if (body?.success && body?.data) {
-        setResult(body.data);
+        setTranslateResult(body.data);
       } else {
         throw new Error('翻译失败，请重试');
       }
@@ -75,27 +98,68 @@ function TranslatePanelContent({ documentId }: { documentId: string }) {
         '翻译失败，请检查 QWEN_API_KEY 配置';
       setError(msg);
     } finally {
-      setLoading(false);
+      setTranslateLoading(false);
+    }
+  };
+
+  const handleFormat = async () => {
+    if (formatLoading) return;
+    setFormatLoading(true);
+    setError(null);
+    setTranslateResult(null);
+    setFormatResult(false);
+    try {
+      const response = await post('/api/ai-format', { documentId });
+      const body = response.data as any;
+      if (body?.success) {
+        setFormatResult(true);
+      } else {
+        throw new Error('排版优化失败，请重试');
+      }
+    } catch (err: any) {
+      const msg =
+        err?.response?.data?.error?.message ||
+        err?.response?.data?.message ||
+        err?.message ||
+        '排版优化失败，请重试';
+      setError(msg);
+    } finally {
+      setFormatLoading(false);
     }
   };
 
   return (
     <div>
       <button
-        style={{ ...s.btn, ...(loading ? s.btnDisabled : {}) }}
+        style={{ ...s.btn, ...(translateLoading ? s.btnDisabled : {}) }}
         onClick={handleTranslate}
-        disabled={loading}
+        disabled={translateLoading || formatLoading}
       >
-        {loading ? '⏳ 翻译中（约30秒）…' : '🌐 翻译并发布双语'}
+        {translateLoading ? '⏳ 翻译中（约30秒）…' : '🌐 翻译并发布双语'}
       </button>
       <p style={s.hint}>将中文内容翻译为英文，同时发布中英文两个版本。</p>
-      {result && (
+
+      <button
+        style={{ ...s.btn, ...s.btnSecondary, ...(formatLoading ? s.btnDisabled : {}) }}
+        onClick={handleFormat}
+        disabled={translateLoading || formatLoading}
+      >
+        {formatLoading ? '⏳ 优化中（约20秒）…' : '✨ AI 优化排版'}
+      </button>
+      <p style={s.hint}>自动添加标题、引用块等 Markdown 结构，内容不变，保存为草稿。</p>
+
+      {translateResult && (
         <div style={s.success}>
-          ✅ 发布成功
+          ✅ 双语发布成功
           <br />
-          中文：{result.zhTitle}
+          中文：{translateResult.zhTitle}
           <br />
-          English: {result.enTitle}
+          English: {translateResult.enTitle}
+        </div>
+      )}
+      {formatResult && (
+        <div style={s.success}>
+          ✅ 排版优化完成，已保存为草稿，请刷新页面查看。
         </div>
       )}
       {error && <div style={s.error}>❌ {error}</div>}
@@ -103,15 +167,12 @@ function TranslatePanelContent({ documentId }: { documentId: string }) {
   );
 }
 
-// Strapi 5 DescriptionComponent: receives props from Strapi, returns { title, content } or null
 const TranslatePanel = ({ model, documentId, document }: any) => {
-  // Only show for articles, and only when editing an existing document
   if (model !== 'api::article.article') return null;
-  if (!documentId || !document) return null;
 
   return {
-    title: 'AI 翻译',
-    content: <TranslatePanelContent documentId={documentId} />,
+    title: 'AI 工具',
+    content: <TranslatePanelContent documentId={documentId ?? null} />,
   };
 };
 

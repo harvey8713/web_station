@@ -18,5 +18,14 @@ export default {
         policies: [],
       },
     },
+    {
+      method: 'POST',
+      path: '/ai-format',
+      handler: 'ai-generate.format',
+      config: {
+        auth: false,
+        policies: [],
+      },
+    },
   ],
 };
