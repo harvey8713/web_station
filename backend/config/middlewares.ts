@@ -42,6 +42,7 @@ const config: Core.Config.Middlewares = [
   'strapi::session',
   'strapi::favicon',
   'strapi::public',
+  { name: 'global::uid-generate-fallback', config: {} },
 ];
 
 export default config;
