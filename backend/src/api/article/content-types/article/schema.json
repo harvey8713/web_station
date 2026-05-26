@@ -42,7 +42,7 @@
       "type": "customField",
       "customField": "plugin::ckeditor5.CKEditor",
       "options": {
-        "preset": "default"
+        "preset": "Default HTML editor"
       },
       "pluginOptions": {
         "i18n": {
