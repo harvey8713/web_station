@@ -41,6 +41,9 @@
     "content": {
       "type": "customField",
       "customField": "plugin::ckeditor5.CKEditor",
+      "options": {
+        "preset": "default"
+      },
       "pluginOptions": {
         "i18n": {
           "localized": true
