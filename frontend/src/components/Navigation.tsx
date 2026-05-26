@@ -1,5 +1,6 @@
 'use client';
 
+import {useState} from 'react';
 import {useTranslations, useLocale} from 'next-intl';
 import {Link, usePathname} from '@/i18n/routing';
 import {useGlobal} from '@/components/GlobalProvider';
@@ -8,6 +9,7 @@ export default function Navigation() {
   const t = useTranslations('nav');
   const g = useGlobal();
   const pathname = usePathname();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const navLinks = g?.nav_links?.length
     ? g.nav_links.map((link) => ({ href: link.href, label: link.label }))
@@ -19,28 +21,62 @@ export default function Navigation() {
       ];
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-[60px] py-7 bg-[rgba(250,250,248,0.92)] backdrop-blur-[12px] border-b border-transparent transition-colors">
-      <div className="nav-logo">
-        <Link href="/">
-          <img src="/logo.jpg" alt="Magician in Jewellery" className="h-9 w-9 object-contain" />
-        </Link>
-      </div>
-      <ul className="hidden md:flex gap-12 list-none">
-        {navLinks.map((link) => (
-          <li key={link.href}>
-            <Link
-              href={link.href}
-              className="font-sans text-[11px] font-normal tracking-[0.18em] uppercase no-underline text-[var(--ink)] transition-colors hover:text-[var(--gold)]"
-            >
-              {link.label}
-            </Link>
-          </li>
-        ))}
-      </ul>
-      <div className="flex items-center gap-5">
-        <LanguageToggle />
-      </div>
-    </nav>
+    <>
+      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-[60px] py-7 bg-[rgba(250,250,248,0.92)] backdrop-blur-[12px] border-b border-transparent transition-colors">
+        <div className="nav-logo">
+          <Link href="/">
+            <img src="/logo.jpg" alt="Magician in Jewellery" className="h-9 w-9 object-contain" style={{mixBlendMode: 'multiply'}} />
+          </Link>
+        </div>
+
+        {/* Desktop nav */}
+        <ul className="hidden md:flex gap-12 list-none">
+          {navLinks.map((link) => (
+            <li key={link.href}>
+              <Link
+                href={link.href}
+                className="font-sans text-[11px] font-normal tracking-[0.18em] uppercase no-underline text-[var(--ink)] transition-colors hover:text-[var(--gold)]"
+              >
+                {link.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+
+        <div className="flex items-center gap-5">
+          <LanguageToggle />
+          {/* Hamburger button — mobile only */}
+          <button
+            className="md:hidden flex flex-col gap-[5px] p-1"
+            onClick={() => setMenuOpen((v) => !v)}
+            aria-label="Toggle menu"
+          >
+            <span className={`block w-5 h-px bg-[var(--ink)] transition-transform origin-center ${menuOpen ? 'translate-y-[6px] rotate-45' : ''}`} />
+            <span className={`block w-5 h-px bg-[var(--ink)] transition-opacity ${menuOpen ? 'opacity-0' : ''}`} />
+            <span className={`block w-5 h-px bg-[var(--ink)] transition-transform origin-center ${menuOpen ? '-translate-y-[6px] -rotate-45' : ''}`} />
+          </button>
+        </div>
+      </nav>
+
+      {/* Mobile dropdown */}
+      {menuOpen && (
+        <div className="fixed top-[73px] left-0 right-0 z-40 bg-[rgba(250,250,248,0.97)] backdrop-blur-[12px] border-b border-[rgba(0,0,0,0.08)] md:hidden">
+          <ul className="list-none px-6 py-6 flex flex-col gap-6">
+            {navLinks.map((link) => (
+              <li key={link.href}>
+                <Link
+                  href={link.href}
+                  onClick={() => setMenuOpen(false)}
+                  className="font-sans text-[11px] font-normal tracking-[0.18em] uppercase no-underline text-[var(--ink)] hover:text-[var(--gold)]"
+                >
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </>
   );
 }
 
