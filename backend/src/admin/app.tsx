@@ -1,8 +1,15 @@
 import type { StrapiApp } from '@strapi/strapi/admin';
 import { Magic, Information } from '@strapi/icons';
 import { TranslatePanel } from './components/TranslatePanel';
+import { setPluginConfig, defaultHtmlPreset } from '@_sh/strapi-plugin-ckeditor';
 
 export default {
+  register() {
+    setPluginConfig({
+      presets: [defaultHtmlPreset],
+    });
+  },
+
   config: {
     locales: ['zh-Hans'],
     translations: {
