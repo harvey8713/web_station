@@ -6,8 +6,9 @@ const config = ({ env }: Core.Config.Shared.ConfigParams): Core.Config.Plugin =>
       enabled: false,
       resolve: './src/plugins/ai-content-generator',
     },
-    'ckeditor': {
+    'ckeditor5': {
       enabled: true,
+      resolve: './node_modules/@_sh/strapi-plugin-ckeditor',
     },
   };
 
