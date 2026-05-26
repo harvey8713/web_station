@@ -249,6 +249,8 @@ Output strictly in JSON format:
       const enRaw = await callQwen([{ role: 'user', content: enUserPrompt }]);
       const en = extractJson(enRaw);
       const enBlocks = en.content ? markdownToBlocks(en.content) : null;
+      const enSlug = zhDoc.slug ||
+        (en.title as string).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
       await (strapi as any).documents('api::article.article').update({
         documentId,
@@ -257,7 +259,7 @@ Output strictly in JSON format:
           excerpt: en.excerpt ?? null,
           content: enBlocks,
           reading_time: enBlocks ? readingTime(enBlocks, 'en') : zhDoc.reading_time,
-          slug: zhDoc.slug,
+          slug: enSlug,
           ...(zhDoc.cover_image && { cover_image: zhDoc.cover_image.id }),
           ...(zhDoc.category && { category: zhDoc.category.id }),
         },
