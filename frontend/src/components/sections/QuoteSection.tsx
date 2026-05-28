@@ -19,7 +19,7 @@ export default function QuoteSection({data}: Props) {
 
   return (
     <section
-      className={`px-8 md:px-[80px] flex flex-col items-center text-center ${themeClass}`}
+      className={`px-8 md:px-[160px] flex flex-col items-center text-center ${themeClass}`}
       style={{ paddingTop: pt, paddingBottom: pb }}
     >
       <div className={`w-px h-12 ${lineColor} mb-10`}></div>

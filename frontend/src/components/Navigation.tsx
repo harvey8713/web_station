@@ -23,7 +23,7 @@ export default function Navigation() {
   return (
     <>
       <nav className="fixed top-0 left-0 right-0 z-50 bg-[var(--bg)] border-b border-[rgba(0,0,0,0.08)]">
-        <div className="px-8 md:px-[80px] py-7 flex items-center justify-between">
+        <div className="px-8 md:px-[160px] py-7 flex items-center justify-between">
           <div className="nav-logo">
             <Link href="/">
               <img src="/logo.jpg" alt="Magician in Jewelry" className="h-12 w-12 object-contain mix-blend-multiply" />

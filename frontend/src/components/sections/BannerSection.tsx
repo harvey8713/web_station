@@ -28,7 +28,7 @@ export default function BannerSection({data}: Props) {
         className="absolute inset-0 bg-[var(--ink)]"
         style={{ opacity }}
       />
-      <div className={`relative z-10 px-8 md:px-[80px] ${isCentered ? 'flex flex-col items-center text-center' : ''}`}>
+      <div className={`relative z-10 px-8 md:px-[160px] ${isCentered ? 'flex flex-col items-center text-center' : ''}`}>
         {data.heading && (
           <h2 className="font-[family-name:var(--serif)] text-[clamp(36px,5vw,64px)] font-light leading-[1.15] text-[var(--bg)] mb-6 max-w-[700px]">
             {data.heading}

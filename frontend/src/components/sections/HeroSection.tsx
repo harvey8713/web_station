@@ -15,15 +15,16 @@ export default function HeroSection({data, defaults}: Props) {
 
   const pt = data?.padding_top;
   const pb = data?.padding_bottom;
-  const sectionStyle = (pt != null || pb != null)
-    ? { paddingTop: pt != null ? pt : undefined, paddingBottom: pb != null ? pb : undefined }
-    : undefined;
+  const sectionStyle = {
+    paddingTop: pt != null ? pt : 120,
+    ...(pb != null ? { paddingBottom: pb } : {}),
+  };
 
   const isCentered = layout === 'centered';
 
   return (
     <section
-      className={`h-screen min-h-[700px] flex flex-col px-8 md:px-[80px] relative overflow-hidden ${isCentered ? 'items-center' : 'items-start'}`}
+      className={`h-screen min-h-[700px] flex flex-col px-8 md:px-[160px] relative overflow-hidden ${isCentered ? 'items-center' : 'items-start'}`}
       style={sectionStyle}
     >
       <div className="absolute top-0 left-0 right-0 bottom-0 pointer-events-none">
@@ -32,7 +33,7 @@ export default function HeroSection({data, defaults}: Props) {
         <div className="absolute top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-[var(--gold-light)] to-transparent opacity-35 right-[15%]"></div>
       </div>
 
-      <div className={`flex flex-col flex-1 justify-center relative z-10 ${isCentered ? 'items-center text-center' : `items-start pt-[120px]`}`}>
+      <div className={`flex flex-col flex-1 justify-center relative z-10 ${isCentered ? 'items-center text-center' : 'items-start'}`}>
         <p className="font-sans text-[10px] font-normal tracking-[0.35em] uppercase text-[var(--gold)] mb-8">
           {eyebrow}
         </p>

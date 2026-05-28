@@ -38,7 +38,7 @@ export default async function ArticlePage({
         )}
 
         {/* Centered content */}
-        <div className="flex justify-center px-8 md:px-[80px]">
+        <div className="flex justify-center px-8 md:px-[160px]">
           <article className="w-full max-w-[860px]">
             {article.category?.name && (
               <p className="font-sans text-[9px] font-medium tracking-[0.25em] uppercase text-[var(--gold)] mb-4">
