@@ -22,10 +22,10 @@ export default function Navigation() {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-[60px] py-7 bg-[rgba(250,250,248,0.92)] backdrop-blur-[12px] border-b border-transparent transition-colors">
-        <div className="nav-logo">
+      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 md:px-[80px] py-7 bg-[rgba(250,250,248,0.92)] backdrop-blur-[12px] border-b border-transparent transition-colors">
+        <div className="nav-logo bg-[var(--bg)]" style={{isolation: 'isolate'}}>
           <Link href="/">
-            <img src="/logo.jpg" alt="Magician in Jewellery" className="h-12 w-12 object-contain" style={{mixBlendMode: 'multiply'}} />
+            <img src="/logo.jpg" alt="Magician in Jewelry" className="h-12 w-12 object-contain" style={{mixBlendMode: 'multiply'}} />
           </Link>
         </div>
 
@@ -60,8 +60,8 @@ export default function Navigation() {
 
       {/* Mobile dropdown */}
       {menuOpen && (
-        <div className="fixed top-[73px] left-0 right-0 z-40 bg-[rgba(250,250,248,0.97)] backdrop-blur-[12px] border-b border-[rgba(0,0,0,0.08)] md:hidden">
-          <ul className="list-none px-6 py-6 flex flex-col gap-6">
+        <div className="fixed top-[104px] left-0 right-0 z-40 bg-[rgba(250,250,248,0.97)] backdrop-blur-[12px] border-b border-[rgba(0,0,0,0.08)] md:hidden">
+          <ul className="list-none px-8 py-6 flex flex-col gap-6">
             {navLinks.map((link) => (
               <li key={link.href}>
                 <Link

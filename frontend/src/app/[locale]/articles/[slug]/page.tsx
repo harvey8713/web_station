@@ -22,7 +22,7 @@ export default async function ArticlePage({
     <>
       <Navigation />
 
-      <main className="pt-[120px] pb-32">
+      <main className="pt-[160px] pb-32">
         {/* Hero Image — full bleed */}
         {article.cover_image?.url && (
           <div className="w-full h-[60vh] relative mb-16">
@@ -38,7 +38,7 @@ export default async function ArticlePage({
         )}
 
         {/* Centered content */}
-        <div className="flex justify-center px-6 md:px-[60px]">
+        <div className="flex justify-center px-8 md:px-[80px]">
           <article className="w-full max-w-[860px]">
             {article.category?.name && (
               <p className="font-sans text-[9px] font-medium tracking-[0.25em] uppercase text-[var(--gold)] mb-4">
@@ -61,7 +61,7 @@ export default async function ArticlePage({
             <div className="mt-16 pt-10 border-t border-[rgba(0,0,0,0.08)] flex items-center gap-4">
               <div className="w-8 h-px bg-[var(--gold)]"></div>
               <p className="font-sans text-[9px] font-medium tracking-[0.3em] uppercase text-[var(--ink-muted)]">
-                Magician in Jewellery
+                Magician in Jewelry
               </p>
             </div>
           </article>

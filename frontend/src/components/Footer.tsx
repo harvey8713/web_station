@@ -13,7 +13,7 @@ export default function Footer() {
   const linkedinUrl = g?.linkedin_url || 'https://linkedin.com';
 
   return (
-    <footer className="px-[60px] py-10 flex items-center justify-between border-t border-[rgba(0,0,0,0.08)]">
+    <footer className="px-8 md:px-[80px] py-10 flex items-center justify-between border-t border-[rgba(0,0,0,0.08)]">
       <p className="font-sans text-[11px] font-light text-[var(--ink-muted)] tracking-[0.08em]">
         {copyright}
       </p>

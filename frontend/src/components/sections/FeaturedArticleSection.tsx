@@ -36,7 +36,7 @@ export default function FeaturedArticleSection({data, locale, article}: Props) {
   );
 
   const textBlock = (
-    <div className="px-[60px] py-16 flex flex-col justify-center bg-[var(--bg)]">
+    <div className="px-8 md:px-[80px] py-16 flex flex-col justify-center bg-[var(--bg)]">
       <p className="font-sans text-[9px] font-medium tracking-[0.25em] uppercase text-[var(--gold)] mb-5">
         {article.category?.name}
       </p>
@@ -58,7 +58,7 @@ export default function FeaturedArticleSection({data, locale, article}: Props) {
   );
 
   return (
-    <section style={{ paddingTop: pt, paddingBottom: pb }} className="px-[60px]">
+    <section style={{ paddingTop: pt, paddingBottom: pb }} className="px-8 md:px-[80px]">
       <p className="font-sans text-[10px] font-normal tracking-[0.3em] uppercase text-[var(--gold)] mb-10">
         {label}
       </p>

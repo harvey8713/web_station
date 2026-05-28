@@ -8,9 +8,9 @@ interface Props {
 
 export default function ContactBandSection({data, locale, defaults}: Props) {
   const description = data?.description || defaults.description;
-  const email = data?.email || 'hello@magicianinjewellery.com';
-  const instagram = data?.instagram || '@magicianinjewellery';
-  const wechat = data?.wechat || 'MagicianInJewellery';
+  const email = data?.email || 'hello@magicianinjewelry.com';
+  const instagram = data?.instagram || '@magicianinjewelry';
+  const wechat = data?.wechat || 'MagicianInJewelry';
 
   const headingLine1 = data?.heading_line1;
   const headingLine2 = data?.heading_line2;
@@ -22,21 +22,21 @@ export default function ContactBandSection({data, locale, defaults}: Props) {
       className="grid grid-cols-1 md:grid-cols-2 bg-[var(--ink)] text-[var(--bg)]"
       style={{ paddingTop: pt != null ? pt : undefined, paddingBottom: pb != null ? pb : undefined }}
     >
-      <div className="px-[60px] py-20 border-r border-[rgba(255,255,255,0.08)]">
+      <div className="px-8 md:px-[80px] py-20 border-r border-[rgba(255,255,255,0.08)]">
         <h2 className="font-[family-name:var(--serif)] text-[clamp(36px,4vw,52px)] font-light leading-[1.2] mb-8">
           {headingLine1 && headingLine2 ? (
             <>{headingLine1}<br/><em className="italic text-[var(--gold-light)]">{headingLine2}</em></>
           ) : locale === 'zh' ? (
             <>来聊聊<br/><em className="italic text-[var(--gold-light)]">珠宝。</em></>
           ) : (
-            <>Let&apos;s talk<br/>about <em className="italic text-[var(--gold-light)]">jewellery.</em></>
+            <>Let&apos;s talk<br/>about <em className="italic text-[var(--gold-light)]">jewelry.</em></>
           )}
         </h2>
         <p className="font-sans text-[14px] font-light leading-[1.8] text-[rgba(240,237,230,0.65)] max-w-[360px]">
           {description}
         </p>
       </div>
-      <div className="px-[60px] py-20 flex flex-col justify-center gap-8">
+      <div className="px-8 md:px-[80px] py-20 flex flex-col justify-center gap-8">
         <div>
           <p className="font-sans text-[9px] font-medium tracking-[0.3em] uppercase text-[rgba(255,255,255,0.35)] mb-2">
             {defaults.emailLabel}

@@ -14,8 +14,8 @@ export default async function AboutPage({
     <>
       <Navigation />
 
-      <main className="pt-[120px] pb-20">
-        <div className="flex justify-center px-6 md:px-[60px]">
+      <main className="pt-[160px] pb-20">
+        <div className="flex justify-center px-8 md:px-[80px]">
         <div className="w-full max-w-[860px]">
           <div className="mb-16">
             <p className="font-sans text-[10px] font-normal tracking-[0.3em] uppercase text-[var(--gold)] mb-8">
@@ -38,7 +38,7 @@ export default async function AboutPage({
             <p className="text-[var(--ink-muted)]">
               {locale === 'zh'
                 ? '我们相信，珠宝不仅仅是装饰品——它是品牌叙事、文化表达和设计哲学的载体。通过深入的分析和独特的视角，我们探索珠宝设计如何塑造品牌身份，以及品牌如何通过设计传达其价值观。'
-                : 'We believe that jewellery is more than adornment — it is a vehicle for brand narrative, cultural expression, and design philosophy. Through in-depth analysis and unique perspectives, we explore how jewellery design shapes brand identity, and how brands communicate their values through design.'
+                : 'We believe that jewelry is more than adornment — it is a vehicle for brand narrative, cultural expression, and design philosophy. Through in-depth analysis and unique perspectives, we explore how jewelry design shapes brand identity, and how brands communicate their values through design.'
               }
             </p>
 
@@ -49,7 +49,7 @@ export default async function AboutPage({
               <p className="text-[var(--ink-muted)]">
                 {locale === 'zh'
                   ? '为珠宝行业的从业者、品牌创始人、设计师和爱好者提供有深度的内容，帮助他们理解珠宝设计与品牌建设的本质，启发创新思维，推动行业发展。'
-                  : 'To provide in-depth content for jewellery industry practitioners, brand founders, designers, and enthusiasts, helping them understand the essence of jewellery design and brand building, inspire innovative thinking, and drive industry development.'
+                  : 'To provide in-depth content for jewelry industry practitioners, brand founders, designers, and enthusiasts, helping them understand the essence of jewelry design and brand building, inspire innovative thinking, and drive industry development.'
                 }
               </p>
             </div>

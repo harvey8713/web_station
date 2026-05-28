@@ -23,7 +23,7 @@ export default function HeroSection({data, defaults}: Props) {
 
   return (
     <section
-      className={`h-screen min-h-[700px] flex flex-col justify-center px-[60px] relative overflow-hidden ${isCentered ? 'items-center text-center' : 'items-start pt-[120px]'}`}
+      className={`h-screen min-h-[700px] flex flex-col justify-center px-8 md:px-[80px] relative overflow-hidden ${isCentered ? 'items-center text-center' : 'items-start pt-[120px]'}`}
       style={sectionStyle}
     >
       <div className="absolute top-0 left-0 right-0 bottom-0 pointer-events-none">
@@ -38,7 +38,11 @@ export default function HeroSection({data, defaults}: Props) {
       <h1 className={`font-[family-name:var(--serif)] font-light text-[clamp(72px,10vw,148px)] leading-[0.92] tracking-[-0.02em] mb-10 relative z-10 ${isCentered ? '' : 'max-w-[80vw]'}`}>
         {data?.title_line1 || 'Magician'}<br/>
         <em className="italic text-[var(--ink-muted)]">
-          {data?.title_line2 ? data.title_line2 : <>in<br/>Jewellery</>}
+          {(() => {
+            const line2 = data?.title_line2 || 'in Jewelry';
+            const spaceIdx = line2.indexOf(' ');
+            return spaceIdx === -1 ? line2 : <>{line2.slice(0, spaceIdx)}<br/>{line2.slice(spaceIdx + 1)}</>;
+          })()}
         </em>
       </h1>
       <div className={`w-20 h-px bg-gradient-to-r from-transparent via-[var(--gold)] to-transparent mb-8 relative z-10 ${isCentered ? 'mx-auto' : ''}`}></div>

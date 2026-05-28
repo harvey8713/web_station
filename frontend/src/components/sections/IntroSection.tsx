@@ -21,7 +21,7 @@ export default function IntroSection({data, locale, defaults}: Props) {
   const pb = data?.padding_bottom;
 
   const textBlock = (
-    <div className="px-[72px] lg:px-[80px] py-20 flex flex-col justify-center bg-[var(--bg)]">
+    <div className="px-8 md:px-[80px] py-20 flex flex-col justify-center bg-[var(--bg)]">
       <p className="font-sans text-[10px] font-normal tracking-[0.3em] uppercase text-[var(--gold)] mb-8">
         {label}
       </p>
@@ -56,7 +56,7 @@ export default function IntroSection({data, locale, defaults}: Props) {
         M
       </span>
       <span className="absolute bottom-10 left-10 font-sans text-[10px] tracking-[0.2em] uppercase text-[rgba(255,255,255,0.45)]">
-        Magician in Jewellery · Est. 2024
+        Magician in Jewelry · Est. 2024
       </span>
     </div>
   );
@@ -64,7 +64,7 @@ export default function IntroSection({data, locale, defaults}: Props) {
   if (layout === 'text-only') {
     return (
       <section
-        className="px-[80px] py-20"
+        className="px-8 md:px-[80px] py-20"
         style={{
           paddingTop: pt != null ? pt : undefined,
           paddingBottom: pb != null ? pb : undefined,

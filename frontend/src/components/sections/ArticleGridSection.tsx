@@ -27,7 +27,7 @@ export default function ArticleGridSection({data, locale, articles, defaults}: P
     : 'grid grid-cols-1 md:grid-cols-3 gap-10';
 
   return (
-    <section className="px-[60px]" style={{ paddingTop: pt, paddingBottom: pb }}>
+    <section className="px-8 md:px-[80px]" style={{ paddingTop: pt, paddingBottom: pb }}>
       <div className="flex items-baseline justify-between mb-16 border-b border-[rgba(0,0,0,0.1)] pb-6">
         <h2 className="font-[family-name:var(--serif)] text-[clamp(32px,4vw,48px)] font-light">
           {titlePrefix && titleHighlight ? (
