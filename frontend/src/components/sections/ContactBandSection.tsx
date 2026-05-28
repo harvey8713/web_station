@@ -36,7 +36,7 @@ export default function ContactBandSection({data, locale, defaults}: Props) {
           {description}
         </p>
       </div>
-      <div className="px-8 md:px-[80px] py-20 flex flex-col justify-center gap-8">
+      <div className="px-8 md:px-[80px] py-20 flex flex-col justify-center gap-8 items-end text-right">
         <div>
           <p className="font-sans text-[9px] font-medium tracking-[0.3em] uppercase text-[rgba(255,255,255,0.35)] mb-2">
             {defaults.emailLabel}

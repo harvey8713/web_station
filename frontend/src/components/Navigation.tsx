@@ -23,7 +23,7 @@ export default function Navigation() {
   return (
     <>
       <nav className="fixed top-0 left-0 right-0 z-50 bg-[var(--bg)] border-b border-[rgba(0,0,0,0.08)]">
-        <div className="max-w-[1440px] mx-auto px-8 md:px-[80px] py-7 flex items-center justify-between">
+        <div className="px-8 md:px-[80px] py-7 flex items-center justify-between">
           <div className="nav-logo">
             <Link href="/">
               <img src="/logo.jpg" alt="Magician in Jewelry" className="h-12 w-12 object-contain mix-blend-multiply" />
@@ -63,7 +63,7 @@ export default function Navigation() {
       {/* Mobile dropdown */}
       {menuOpen && (
         <div className="fixed top-[104px] left-0 right-0 z-40 bg-[var(--bg)] border-b border-[rgba(0,0,0,0.08)] md:hidden">
-          <ul className="list-none max-w-[1440px] mx-auto px-8 py-6 flex flex-col gap-6">
+          <ul className="list-none px-8 py-6 flex flex-col gap-6">
             {navLinks.map((link) => (
               <li key={link.href}>
                 <Link

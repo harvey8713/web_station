@@ -21,7 +21,7 @@ export default function IntroSection({data, locale, defaults}: Props) {
   const pb = data?.padding_bottom;
 
   const textBlock = (
-    <div className="px-8 md:px-12 py-20 flex flex-col justify-center bg-[var(--bg)]">
+    <div className="pl-8 md:pl-12 py-20 flex flex-col justify-center bg-[var(--bg)]">
       <p className="font-sans text-[10px] font-normal tracking-[0.3em] uppercase text-[var(--gold)] mb-8">
         {label}
       </p>
@@ -133,12 +133,12 @@ export default function IntroSection({data, locale, defaults}: Props) {
   // image-left or image-right
   return (
     <section
+      className="px-8 md:px-[80px]"
       style={{
         paddingTop: pt != null ? pt : undefined,
         paddingBottom: pb != null ? pb : undefined,
       }}
     >
-      <div className="max-w-[1440px] mx-auto px-8 md:px-[80px]">
       <div
         className="grid grid-cols-1 md:grid-cols-2"
         style={{ minHeight: minH }}
@@ -148,7 +148,6 @@ export default function IntroSection({data, locale, defaults}: Props) {
         ) : (
           <>{imageBlock}{textBlock}</>
         )}
-      </div>
       </div>
     </section>
   );
