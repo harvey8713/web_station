@@ -12,7 +12,7 @@ export default function IntroSection({data, locale, defaults}: Props) {
   const body = data?.body || defaults.body;
   const linkText = data?.link_text || defaults.link;
   const linkUrl = data?.link_url || '/about';
-  const bgImage = data?.background_image_url || 'https://images.unsplash.com/photo-1617038220319-276d3cfab638?w=1200&q=85';
+  const bgImage = data?.background_image_url || '/about-bg.png';
   const headingZh = data?.heading_zh || '工艺与品牌智识的交汇';
   const layout = data?.layout || 'image-left';
   const minH = data?.min_height ?? 520;
@@ -133,12 +133,12 @@ export default function IntroSection({data, locale, defaults}: Props) {
   // image-left or image-right
   return (
     <section
-      className="px-8 md:px-[80px]"
       style={{
         paddingTop: pt != null ? pt : undefined,
         paddingBottom: pb != null ? pb : undefined,
       }}
     >
+      <div className="max-w-[1440px] mx-auto px-8 md:px-[80px]">
       <div
         className="grid grid-cols-1 md:grid-cols-2"
         style={{ minHeight: minH }}
@@ -148,6 +148,7 @@ export default function IntroSection({data, locale, defaults}: Props) {
         ) : (
           <>{imageBlock}{textBlock}</>
         )}
+      </div>
       </div>
     </section>
   );

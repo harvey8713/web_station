@@ -26,7 +26,7 @@ export default function Navigation() {
         <div className="max-w-[1440px] mx-auto px-8 md:px-[80px] py-7 flex items-center justify-between">
           <div className="nav-logo">
             <Link href="/">
-              <img src="/logo.jpg" alt="Magician in Jewelry" className="h-12 w-12 object-contain" />
+              <img src="/logo.jpg" alt="Magician in Jewelry" className="h-12 w-12 object-contain mix-blend-multiply" />
             </Link>
           </div>
 
