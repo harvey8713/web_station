@@ -22,46 +22,48 @@ export default function Navigation() {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 md:px-[80px] py-7 bg-[rgba(250,250,248,0.92)] backdrop-blur-[12px] border-b border-transparent transition-colors">
-        <div className="nav-logo bg-[var(--bg)]" style={{isolation: 'isolate'}}>
-          <Link href="/">
-            <img src="/logo.jpg" alt="Magician in Jewelry" className="h-12 w-12 object-contain" style={{mixBlendMode: 'multiply'}} />
-          </Link>
-        </div>
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-[var(--bg)] border-b border-[rgba(0,0,0,0.08)]">
+        <div className="max-w-[1440px] mx-auto px-8 md:px-[80px] py-7 flex items-center justify-between">
+          <div className="nav-logo">
+            <Link href="/">
+              <img src="/logo.jpg" alt="Magician in Jewelry" className="h-12 w-12 object-contain" />
+            </Link>
+          </div>
 
-        {/* Desktop nav */}
-        <ul className="hidden md:flex gap-12 list-none">
-          {navLinks.map((link) => (
-            <li key={link.href}>
-              <Link
-                href={link.href}
-                className="font-sans text-[13px] font-normal tracking-[0.18em] uppercase no-underline text-[var(--ink)] transition-colors hover:text-[var(--gold)]"
-              >
-                {link.label}
-              </Link>
-            </li>
-          ))}
-        </ul>
+          {/* Desktop nav */}
+          <ul className="hidden md:flex gap-12 list-none">
+            {navLinks.map((link) => (
+              <li key={link.href}>
+                <Link
+                  href={link.href}
+                  className="font-sans text-[13px] font-normal tracking-[0.18em] uppercase no-underline text-[var(--ink)] transition-colors hover:text-[var(--gold)]"
+                >
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
 
-        <div className="flex items-center gap-5">
-          <LanguageToggle />
-          {/* Hamburger button — mobile only */}
-          <button
-            className="md:hidden flex flex-col gap-[5px] p-1"
-            onClick={() => setMenuOpen((v) => !v)}
-            aria-label="Toggle menu"
-          >
-            <span className={`block w-5 h-px bg-[var(--ink)] transition-transform origin-center ${menuOpen ? 'translate-y-[6px] rotate-45' : ''}`} />
-            <span className={`block w-5 h-px bg-[var(--ink)] transition-opacity ${menuOpen ? 'opacity-0' : ''}`} />
-            <span className={`block w-5 h-px bg-[var(--ink)] transition-transform origin-center ${menuOpen ? '-translate-y-[6px] -rotate-45' : ''}`} />
-          </button>
+          <div className="flex items-center gap-5">
+            <LanguageToggle />
+            {/* Hamburger button — mobile only */}
+            <button
+              className="md:hidden flex flex-col gap-[5px] p-1"
+              onClick={() => setMenuOpen((v) => !v)}
+              aria-label="Toggle menu"
+            >
+              <span className={`block w-5 h-px bg-[var(--ink)] transition-transform origin-center ${menuOpen ? 'translate-y-[6px] rotate-45' : ''}`} />
+              <span className={`block w-5 h-px bg-[var(--ink)] transition-opacity ${menuOpen ? 'opacity-0' : ''}`} />
+              <span className={`block w-5 h-px bg-[var(--ink)] transition-transform origin-center ${menuOpen ? '-translate-y-[6px] -rotate-45' : ''}`} />
+            </button>
+          </div>
         </div>
       </nav>
 
       {/* Mobile dropdown */}
       {menuOpen && (
-        <div className="fixed top-[104px] left-0 right-0 z-40 bg-[rgba(250,250,248,0.97)] backdrop-blur-[12px] border-b border-[rgba(0,0,0,0.08)] md:hidden">
-          <ul className="list-none px-8 py-6 flex flex-col gap-6">
+        <div className="fixed top-[104px] left-0 right-0 z-40 bg-[var(--bg)] border-b border-[rgba(0,0,0,0.08)] md:hidden">
+          <ul className="list-none max-w-[1440px] mx-auto px-8 py-6 flex flex-col gap-6">
             {navLinks.map((link) => (
               <li key={link.href}>
                 <Link

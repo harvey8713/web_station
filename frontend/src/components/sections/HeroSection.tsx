@@ -35,15 +35,19 @@ export default function HeroSection({data, defaults}: Props) {
       <p className="font-sans text-[10px] font-normal tracking-[0.35em] uppercase text-[var(--gold)] mb-8 relative z-10">
         {eyebrow}
       </p>
-      <h1 className={`font-[family-name:var(--serif)] font-light text-[clamp(72px,10vw,148px)] leading-[0.92] tracking-[-0.02em] mb-10 relative z-10 ${isCentered ? '' : 'max-w-[80vw]'}`}>
+      <h1 className={`font-[family-name:var(--serif)] font-light text-[clamp(72px,10vw,148px)] leading-[1.05] tracking-[-0.02em] mb-10 relative z-10 ${isCentered ? '' : 'max-w-[80vw]'}`}>
         {data?.title_line1 || 'Magician'}<br/>
-        <em className="italic text-[var(--ink-muted)]">
-          {(() => {
-            const line2 = data?.title_line2 || 'in Jewelry';
-            const spaceIdx = line2.indexOf(' ');
-            return spaceIdx === -1 ? line2 : <>{line2.slice(0, spaceIdx)}<br/>{line2.slice(spaceIdx + 1)}</>;
-          })()}
-        </em>
+        {(() => {
+          const line2 = data?.title_line2 || 'in Jewelry';
+          const spaceIdx = line2.indexOf(' ');
+          if (spaceIdx === -1) return <em className="italic text-[var(--ink-muted)]">{line2}</em>;
+          return (
+            <>
+              <span className="not-italic text-[var(--ink-muted)]">{line2.slice(0, spaceIdx)}</span><br/>
+              <em className="italic text-[var(--ink-muted)]">{line2.slice(spaceIdx + 1)}</em>
+            </>
+          );
+        })()}
       </h1>
       <div className={`w-20 h-px bg-gradient-to-r from-transparent via-[var(--gold)] to-transparent mb-8 relative z-10 ${isCentered ? 'mx-auto' : ''}`}></div>
       <p className={`font-sans text-[13px] font-light tracking-[0.06em] leading-[1.8] text-[var(--ink-muted)] max-w-[480px] mb-12 relative z-10 ${isCentered ? 'mx-auto' : ''}`}>
