@@ -37,7 +37,9 @@ export default function HeroSection({data, defaults}: Props) {
       </p>
       <h1 className={`font-[family-name:var(--serif)] font-light text-[clamp(72px,10vw,148px)] leading-[0.92] tracking-[-0.02em] mb-10 relative z-10 ${isCentered ? '' : 'max-w-[80vw]'}`}>
         {data?.title_line1 || 'Magician'}<br/>
-        <em className="italic text-[var(--ink-muted)]">{data?.title_line2 || 'in Jewellery'}</em>
+        <em className="italic text-[var(--ink-muted)]">
+          {data?.title_line2 ? data.title_line2 : <>in<br/>Jewellery</>}
+        </em>
       </h1>
       <div className={`w-20 h-px bg-gradient-to-r from-transparent via-[var(--gold)] to-transparent mb-8 relative z-10 ${isCentered ? 'mx-auto' : ''}`}></div>
       <p className={`font-sans text-[13px] font-light tracking-[0.06em] leading-[1.8] text-[var(--ink-muted)] max-w-[480px] mb-12 relative z-10 ${isCentered ? 'mx-auto' : ''}`}>

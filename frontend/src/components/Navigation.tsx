@@ -25,7 +25,7 @@ export default function Navigation() {
       <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-[60px] py-7 bg-[rgba(250,250,248,0.92)] backdrop-blur-[12px] border-b border-transparent transition-colors">
         <div className="nav-logo">
           <Link href="/">
-            <img src="/logo.jpg" alt="Magician in Jewellery" className="h-9 w-9 object-contain" style={{mixBlendMode: 'multiply'}} />
+            <img src="/logo.jpg" alt="Magician in Jewellery" className="h-12 w-12 object-contain" style={{mixBlendMode: 'multiply'}} />
           </Link>
         </div>
 
@@ -35,7 +35,7 @@ export default function Navigation() {
             <li key={link.href}>
               <Link
                 href={link.href}
-                className="font-sans text-[11px] font-normal tracking-[0.18em] uppercase no-underline text-[var(--ink)] transition-colors hover:text-[var(--gold)]"
+                className="font-sans text-[13px] font-normal tracking-[0.18em] uppercase no-underline text-[var(--ink)] transition-colors hover:text-[var(--gold)]"
               >
                 {link.label}
               </Link>
@@ -67,7 +67,7 @@ export default function Navigation() {
                 <Link
                   href={link.href}
                   onClick={() => setMenuOpen(false)}
-                  className="font-sans text-[11px] font-normal tracking-[0.18em] uppercase no-underline text-[var(--ink)] hover:text-[var(--gold)]"
+                  className="font-sans text-[13px] font-normal tracking-[0.18em] uppercase no-underline text-[var(--ink)] hover:text-[var(--gold)]"
                 >
                   {link.label}
                 </Link>
