@@ -24,7 +24,7 @@ export default async function CategoryPage({
     <>
       <Navigation />
 
-      <main className="pt-[160px] pb-20 px-8 md:px-[160px]">
+      <main className="pt-[160px] pb-20 px-8 md:px-[120px]">
         <div className="max-w-[1400px] mx-auto">
           <div className="mb-16 pb-8 border-b border-[rgba(0,0,0,0.1)]">
             <p className="font-sans text-[10px] font-normal tracking-[0.3em] uppercase text-[var(--gold)] mb-4">

@@ -58,7 +58,7 @@ export default function FeaturedArticleSection({data, locale, article}: Props) {
   );
 
   return (
-    <section style={{ paddingTop: pt, paddingBottom: pb }} className="px-8 md:px-[160px]">
+    <section style={{ paddingTop: pt, paddingBottom: pb }} className="px-8 md:px-[120px]">
       <p className="font-sans text-[10px] font-normal tracking-[0.3em] uppercase text-[var(--gold)] mb-10">
         {label}
       </p>
