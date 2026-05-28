@@ -14,7 +14,7 @@ export default async function AboutPage({
     <>
       <Navigation />
 
-      <main className="pt-[160px] pb-20 px-8 md:px-[120px]">
+      <main className="pt-[160px] pb-20 px-8 md:px-[160px]">
         <div className="max-w-[860px] mx-auto">
           <div className="mb-16">
             <p className="font-sans text-[10px] font-normal tracking-[0.3em] uppercase text-[var(--gold)] mb-8">

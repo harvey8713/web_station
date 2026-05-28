@@ -64,7 +64,7 @@ export default function IntroSection({data, locale, defaults}: Props) {
   if (layout === 'text-only') {
     return (
       <section
-        className="px-8 md:px-[120px] py-20"
+        className="px-8 md:px-[160px] py-20"
         style={{
           paddingTop: pt != null ? pt : undefined,
           paddingBottom: pb != null ? pb : undefined,
@@ -133,7 +133,7 @@ export default function IntroSection({data, locale, defaults}: Props) {
   // image-left or image-right
   return (
     <section
-      className="px-8 md:px-[120px]"
+      className="px-8 md:px-[160px]"
       style={{
         paddingTop: pt != null ? pt : undefined,
         paddingBottom: pb != null ? pb : undefined,

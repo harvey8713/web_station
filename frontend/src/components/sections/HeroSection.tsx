@@ -24,7 +24,7 @@ export default function HeroSection({data, defaults}: Props) {
 
   return (
     <section
-      className={`min-h-screen flex flex-col px-8 md:px-[120px] relative overflow-hidden ${isCentered ? 'items-center' : 'items-start'}`}
+      className={`min-h-screen flex flex-col px-8 md:px-[160px] relative overflow-hidden ${isCentered ? 'items-center' : 'items-start'}`}
       style={sectionStyle}
     >
       <div className="absolute top-0 left-0 right-0 bottom-0 pointer-events-none">
