@@ -10,7 +10,6 @@ export default function Footer() {
 
   const copyright = g?.footer_copyright ?? t('copyright');
   const instagramUrl = g?.instagram_url || 'https://instagram.com';
-  const linkedinUrl = g?.linkedin_url || 'https://linkedin.com';
 
   return (
     <footer className="px-8 md:px-[160px] py-10 flex items-center justify-between border-t border-[rgba(0,0,0,0.08)]">
@@ -35,16 +34,6 @@ export default function Footer() {
             </span>
           </li>
         )}
-        <li>
-          <a
-            href={linkedinUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-sans text-[10px] font-normal tracking-[0.18em] uppercase no-underline text-[var(--ink-muted)] transition-colors hover:text-[var(--gold)]"
-          >
-            LinkedIn
-          </a>
-        </li>
       </ul>
     </footer>
   );
