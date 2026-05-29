@@ -46,7 +46,7 @@ export default function IntroSection({data, locale, defaults}: Props) {
 
   const imageBlock = (
     <div
-      className="relative overflow-hidden"
+      className="relative overflow-hidden min-h-[280px] md:min-h-0"
       style={{background: `linear-gradient(rgba(10,8,5,0.38), rgba(10,8,5,0.38)), url('${bgImage}') center/cover no-repeat`}}
     >
       <span
