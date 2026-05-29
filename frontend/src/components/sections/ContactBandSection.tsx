@@ -10,6 +10,9 @@ export default function ContactBandSection({data, locale, defaults}: Props) {
   const description = data?.description || defaults.description;
   const email = data?.email || 'hello@magicianinjewelry.com';
   const instagram = data?.instagram || '@magicianinjewelry';
+  const instagramUrl = instagram.startsWith('http')
+    ? instagram
+    : `https://instagram.com/${instagram.replace('@', '')}`;
   const wechat = data?.wechat || 'MagicianInJewelry';
 
   const headingLine1 = data?.heading_line1;
@@ -52,7 +55,7 @@ export default function ContactBandSection({data, locale, defaults}: Props) {
             {defaults.instagramLabel}
           </p>
           <p className="font-[family-name:var(--serif)] text-[10px] md:text-[20px] font-light text-[var(--bg)]">
-            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="text-inherit no-underline hover:text-[var(--gold-light)]">
+            <a href={instagramUrl} target="_blank" rel="noopener noreferrer" className="text-inherit no-underline hover:text-[var(--gold-light)]">
               {instagram}
             </a>
           </p>
