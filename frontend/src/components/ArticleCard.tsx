@@ -15,7 +15,7 @@ export default function ArticleCard({article}: ArticleCardProps) {
   return (
     <article className="cursor-pointer group">
       <Link href={`/articles/${article.slug}`}>
-        <div className="w-full aspect-square overflow-hidden mb-6 relative">
+        <div className="w-full aspect-square overflow-hidden mb-6 relative bg-[#FAFAF8]">
           <div className="w-full h-full transition-transform duration-[600ms] ease-out group-hover:scale-[1.04]">
             {article.cover_image?.url ? (
               <Image
@@ -23,7 +23,7 @@ export default function ArticleCard({article}: ArticleCardProps) {
                 alt={article.cover_image.alternativeText || article.title}
                 fill
                 unoptimized
-                className="object-cover"
+                className="object-contain"
               />
             ) : (
               <div className="w-full h-full bg-[var(--paper)] flex items-center justify-center">
