@@ -7,9 +7,9 @@ interface Props {
 }
 
 export default function HeroSection({data, defaults}: Props) {
-  const eyebrow = data?.eyebrow || defaults.eyebrow;
-  const subtitle = data?.subtitle || defaults.subtitle;
-  const ctaText = data?.cta_text || defaults.cta;
+  const eyebrow = defaults.eyebrow;
+  const subtitle = defaults.subtitle;
+  const ctaText = defaults.cta;
   const ctaLink = data?.cta_link || '/insights';
   const layout = data?.layout || 'centered';
 
