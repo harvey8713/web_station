@@ -8,12 +8,12 @@ interface Props {
 }
 
 export default function IntroSection({data, locale, defaults}: Props) {
-  const label = data?.label || defaults.label;
+  const label = defaults.label;
   const body = defaults.body;
-  const linkText = data?.link_text || defaults.link;
+  const linkText = defaults.link;
   const linkUrl = data?.link_url || '/about';
   const bgImage = data?.background_image_url || '/about-bg.webp';
-  const headingZh = data?.heading_zh || '工艺与品牌智识的交汇';
+  const headingZh = '工艺与品牌智识的交汇';
   const layout = data?.layout || 'image-left';
   const minH = data?.min_height ?? 520;
 
