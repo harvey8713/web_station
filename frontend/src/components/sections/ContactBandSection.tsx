@@ -15,8 +15,8 @@ export default function ContactBandSection({data, locale, defaults}: Props) {
     : `https://instagram.com/${instagram.replace('@', '')}`;
   const wechat = data?.wechat || 'MagicianInJewelry';
 
-  const headingLine1 = data?.heading_line1;
-  const headingLine2 = data?.heading_line2;
+  const headingLine1 = defaults.heading_line1;
+  const headingLine2 = defaults.heading_line2;
   const pt = data?.padding_top;
   const pb = data?.padding_bottom;
 
