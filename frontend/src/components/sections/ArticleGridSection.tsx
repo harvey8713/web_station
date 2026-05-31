@@ -17,7 +17,7 @@ export default function ArticleGridSection({data, locale, articles, defaults}: P
   const pt = data?.padding_top ?? 100;
   const pb = data?.padding_bottom ?? 100;
 
-  const titlePrefix = defaults.title_prefix;
+  const titlePrefix = data?.title_prefix;
   const titleHighlight = data?.title_highlight;
 
   const gridClass = layout === '2-col'
