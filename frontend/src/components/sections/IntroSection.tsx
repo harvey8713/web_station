@@ -9,7 +9,7 @@ interface Props {
 
 export default function IntroSection({data, locale, defaults}: Props) {
   const label = data?.label || defaults.label;
-  const body = data?.body || defaults.body;
+  const body = defaults.body;
   const linkText = data?.link_text || defaults.link;
   const linkUrl = data?.link_url || '/about';
   const bgImage = data?.background_image_url || '/about-bg.webp';
