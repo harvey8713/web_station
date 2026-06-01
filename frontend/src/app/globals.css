@@ -136,7 +136,7 @@ body {
 .article-content .image img {
   height: auto;
   display: block;
-  max-width: 100%;
+  width: 100%;
 }
 
 .article-content .image.image-style-align-left {
