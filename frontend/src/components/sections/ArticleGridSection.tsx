@@ -11,7 +11,7 @@ interface Props {
 
 export default function ArticleGridSection({data, locale, articles, defaults}: Props) {
   const count = data?.article_count || 3;
-  const viewAllText = data?.view_all_text || defaults.viewAll;
+  const viewAllText = defaults.viewAll;
   const displayed = articles.slice(0, count);
   const layout = data?.layout || '3-col';
   const pt = data?.padding_top ?? 100;

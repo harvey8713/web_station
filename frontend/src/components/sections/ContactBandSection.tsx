@@ -7,7 +7,7 @@ interface Props {
 }
 
 export default function ContactBandSection({data, locale, defaults}: Props) {
-  const description = data?.description || defaults.description;
+  const description = defaults.description;
   const email = data?.email || 'hello@magicianinjewelry.com';
   const instagram = data?.instagram || '@magicianinjewelry';
   const instagramUrl = instagram.startsWith('http')
