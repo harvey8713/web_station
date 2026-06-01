@@ -167,30 +167,90 @@ function readingTime(content: string, lang: 'zh' | 'en') {
 
 export default {
   async translate(ctx: any) {
-    const { documentId } = ctx.request.body as { documentId?: string };
+    const { documentId, sourceLocale } = ctx.request.body as { documentId?: string; sourceLocale?: string };
     if (!documentId?.trim()) return ctx.badRequest('请提供 documentId');
 
-    let zhDoc = await (strapi as any).documents('api::article.article').findOne({
-      documentId, locale: ZH_LOCALE, status: 'draft',
-    });
-    if (!zhDoc) {
-      zhDoc = await (strapi as any).documents('api::article.article').findOne({
-        documentId, locale: ZH_LOCALE, status: 'published',
+    const isEnToZh = sourceLocale === 'en';
+
+    if (isEnToZh) {
+      // ── en → zh ──────────────────────────────────────────────────────────────
+      let enDoc = await (strapi as any).documents('api::article.article').findOne({
+        documentId, locale: 'en', status: 'draft',
       });
-    }
-    if (!zhDoc) return ctx.notFound('未找到该文章的中文版本');
+      if (!enDoc) {
+        enDoc = await (strapi as any).documents('api::article.article').findOne({
+          documentId, locale: 'en', status: 'published',
+        });
+      }
+      if (!enDoc) return ctx.notFound('未找到该文章的英文版本');
+      if (!enDoc.title) return ctx.badRequest('英文版本内容为空，请先填写标题');
 
-    const { title, excerpt } = zhDoc;
-    if (!title) return ctx.badRequest('中文版本内容为空，请先填写标题');
+      const contentMd = htmlToMarkdown(enDoc.content || '');
 
-    const contentMd = htmlToMarkdown(zhDoc.content || '');
+      try {
+        const zhPrompt = `将以下 JSON 内容翻译成专业中文。保持珠宝品牌调性：极简、建筑美学、艺术性。content 字段保持相同的 Markdown 结构。
+重要：所有 Markdown 图片语法 \`![alt](url)\` 原样保留，不得翻译或修改图片 URL。
 
-    try {
-      const enUserPrompt = `Translate the following JSON content into professional English. Maintain the jewellery brand tone: minimalist, architectural, artistic. Keep the same Markdown structure in the content field.
+\`\`\`json
+${JSON.stringify({ title: enDoc.title, excerpt: enDoc.excerpt, content: contentMd }, null, 2)}
+\`\`\`
+
+严格按照以下 JSON 格式输出：
+\`\`\`json
+{
+  "title": "中文标题",
+  "excerpt": "中文摘要（可为 null）",
+  "content": "中文正文，Markdown 格式（可为 null）"
+}
+\`\`\``;
+
+        const zhRaw = await callQwen([{ role: 'user', content: zhPrompt }]);
+        const zh = extractJson(zhRaw);
+        const zhHtml = zh.content ? markdownToHtml(zh.content) : null;
+
+        await (strapi as any).documents('api::article.article').update({
+          documentId,
+          data: {
+            title: zh.title,
+            excerpt: zh.excerpt ?? null,
+            content: zhHtml,
+            reading_time: zhHtml ? readingTime(zhHtml, 'zh') : enDoc.reading_time,
+            ...(enDoc.cover_image && { cover_image: enDoc.cover_image.id }),
+            ...(enDoc.category && { category: enDoc.category.id }),
+          },
+          locale: ZH_LOCALE,
+          status: 'draft',
+        });
+
+        await (strapi as any).documents('api::article.article').publish({ documentId, locale: 'en' });
+        await (strapi as any).documents('api::article.article').publish({ documentId, locale: ZH_LOCALE });
+
+        ctx.body = { success: true, data: { documentId, enTitle: enDoc.title, zhTitle: zh.title } };
+      } catch (error: any) {
+        (strapi as any).log.error('AI 翻译失败:', error.message);
+        return ctx.badRequest(error.message || 'AI 翻译失败，请重试');
+      }
+    } else {
+      // ── zh → en ──────────────────────────────────────────────────────────────
+      let zhDoc = await (strapi as any).documents('api::article.article').findOne({
+        documentId, locale: ZH_LOCALE, status: 'draft',
+      });
+      if (!zhDoc) {
+        zhDoc = await (strapi as any).documents('api::article.article').findOne({
+          documentId, locale: ZH_LOCALE, status: 'published',
+        });
+      }
+      if (!zhDoc) return ctx.notFound('未找到该文章的中文版本');
+      if (!zhDoc.title) return ctx.badRequest('中文版本内容为空，请先填写标题');
+
+      const contentMd = htmlToMarkdown(zhDoc.content || '');
+
+      try {
+        const enPrompt = `Translate the following JSON content into professional English. Maintain the jewellery brand tone: minimalist, architectural, artistic. Keep the same Markdown structure in the content field.
 IMPORTANT: Preserve all Markdown image syntax \`![alt](url)\` exactly as-is — do not translate, modify, or remove image URLs.
 
 \`\`\`json
-${JSON.stringify({ title, excerpt, content: contentMd }, null, 2)}
+${JSON.stringify({ title: zhDoc.title, excerpt: zhDoc.excerpt, content: contentMd }, null, 2)}
 \`\`\`
 
 Output strictly in JSON format:
@@ -202,34 +262,35 @@ Output strictly in JSON format:
 }
 \`\`\``;
 
-      const enRaw = await callQwen([{ role: 'user', content: enUserPrompt }]);
-      const en = extractJson(enRaw);
-      const enHtml = en.content ? markdownToHtml(en.content) : null;
-      const enSlug = zhDoc.slug ||
-        (en.title as string).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        const enRaw = await callQwen([{ role: 'user', content: enPrompt }]);
+        const en = extractJson(enRaw);
+        const enHtml = en.content ? markdownToHtml(en.content) : null;
+        const enSlug = zhDoc.slug ||
+          (en.title as string).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
-      await (strapi as any).documents('api::article.article').update({
-        documentId,
-        data: {
-          title: en.title,
-          excerpt: en.excerpt ?? null,
-          content: enHtml,
-          reading_time: enHtml ? readingTime(enHtml, 'en') : zhDoc.reading_time,
-          slug: enSlug,
-          ...(zhDoc.cover_image && { cover_image: zhDoc.cover_image.id }),
-          ...(zhDoc.category && { category: zhDoc.category.id }),
-        },
-        locale: 'en',
-        status: 'draft',
-      });
+        await (strapi as any).documents('api::article.article').update({
+          documentId,
+          data: {
+            title: en.title,
+            excerpt: en.excerpt ?? null,
+            content: enHtml,
+            reading_time: enHtml ? readingTime(enHtml, 'en') : zhDoc.reading_time,
+            slug: enSlug,
+            ...(zhDoc.cover_image && { cover_image: zhDoc.cover_image.id }),
+            ...(zhDoc.category && { category: zhDoc.category.id }),
+          },
+          locale: 'en',
+          status: 'draft',
+        });
 
-      await (strapi as any).documents('api::article.article').publish({ documentId, locale: ZH_LOCALE });
-      await (strapi as any).documents('api::article.article').publish({ documentId, locale: 'en' });
+        await (strapi as any).documents('api::article.article').publish({ documentId, locale: ZH_LOCALE });
+        await (strapi as any).documents('api::article.article').publish({ documentId, locale: 'en' });
 
-      ctx.body = { success: true, data: { documentId, zhTitle: title, enTitle: en.title } };
-    } catch (error: any) {
-      (strapi as any).log.error('AI 翻译失败:', error.message);
-      return ctx.badRequest(error.message || 'AI 翻译失败，请重试');
+        ctx.body = { success: true, data: { documentId, zhTitle: zhDoc.title, enTitle: en.title } };
+      } catch (error: any) {
+        (strapi as any).log.error('AI 翻译失败:', error.message);
+        return ctx.badRequest(error.message || 'AI 翻译失败，请重试');
+      }
     }
   },
 

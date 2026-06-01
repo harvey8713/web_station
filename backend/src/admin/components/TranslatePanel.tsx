@@ -64,13 +64,19 @@ const s: Record<string, React.CSSProperties> = {
   },
 };
 
-function TranslatePanelContent({ documentId }: { documentId: string | null }) {
+function TranslatePanelContent({ documentId, locale }: { documentId: string | null; locale: string | null }) {
   const [translateLoading, setTranslateLoading] = useState(false);
   const [formatLoading, setFormatLoading] = useState(false);
-  const [translateResult, setTranslateResult] = useState<{ zhTitle: string; enTitle: string } | null>(null);
+  const [translateResult, setTranslateResult] = useState<{ zhTitle?: string; enTitle?: string } | null>(null);
   const [formatResult, setFormatResult] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { post } = useFetchClient();
+
+  const isEn = locale === 'en';
+  const translateLabel = isEn ? '🌐 翻译为中文并发布' : '🌐 翻译为英文并发布';
+  const translateHint = isEn
+    ? '将英文内容翻译为中文，同时发布中英文两个版本。'
+    : '将中文内容翻译为英文，同时发布中英文两个版本。';
 
   if (!documentId) {
     return <div style={s.notice}>💡 保存文章后即可使用 AI 功能。</div>;
@@ -83,7 +89,7 @@ function TranslatePanelContent({ documentId }: { documentId: string | null }) {
     setTranslateResult(null);
     setFormatResult(false);
     try {
-      const response = await post('/api/ai-translate', { documentId });
+      const response = await post('/api/ai-translate', { documentId, sourceLocale: locale });
       const body = response.data as any;
       if (body?.success && body?.data) {
         setTranslateResult(body.data);
@@ -135,9 +141,9 @@ function TranslatePanelContent({ documentId }: { documentId: string | null }) {
         onClick={handleTranslate}
         disabled={translateLoading || formatLoading}
       >
-        {translateLoading ? '⏳ 翻译中（约30秒）…' : '🌐 翻译并发布双语'}
+        {translateLoading ? '⏳ 翻译中（约30秒）…' : translateLabel}
       </button>
-      <p style={s.hint}>将中文内容翻译为英文，同时发布中英文两个版本。</p>
+      <p style={s.hint}>{translateHint}</p>
 
       <button
         style={{ ...s.btn, ...s.btnSecondary, ...(formatLoading ? s.btnDisabled : {}) }}
@@ -169,10 +175,11 @@ function TranslatePanelContent({ documentId }: { documentId: string | null }) {
 
 const TranslatePanel = ({ model, documentId, document }: any) => {
   if (model !== 'api::article.article') return null;
+  const locale = document?.locale ?? null;
 
   return {
     title: 'AI 工具',
-    content: <TranslatePanelContent documentId={documentId ?? null} />,
+    content: <TranslatePanelContent documentId={documentId ?? null} locale={locale} />,
   };
 };
 

@@ -133,6 +133,25 @@ body {
   clear: both;
 }
 
+/* Images inside table cells — allow side-by-side layout */
+.article-content table .image {
+  margin: 0;
+  clear: none;
+  display: block;
+  width: 100%;
+}
+
+.article-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 2rem 0;
+}
+
+.article-content table td {
+  vertical-align: top;
+  padding: 0.5rem;
+}
+
 .article-content .image img {
   height: auto;
   display: block;
