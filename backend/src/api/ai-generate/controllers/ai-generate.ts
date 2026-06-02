@@ -222,9 +222,6 @@ ${JSON.stringify({ title: enDoc.title, excerpt: enDoc.excerpt, content: contentM
           status: 'draft',
         });
 
-        await (strapi as any).documents('api::article.article').publish({ documentId, locale: 'en' });
-        await (strapi as any).documents('api::article.article').publish({ documentId, locale: ZH_LOCALE });
-
         ctx.body = { success: true, data: { documentId, enTitle: enDoc.title, zhTitle: zh.title } };
       } catch (error: any) {
         (strapi as any).log.error('AI 翻译失败:', error.message);
@@ -282,9 +279,6 @@ Output strictly in JSON format:
           locale: 'en',
           status: 'draft',
         });
-
-        await (strapi as any).documents('api::article.article').publish({ documentId, locale: ZH_LOCALE });
-        await (strapi as any).documents('api::article.article').publish({ documentId, locale: 'en' });
 
         ctx.body = { success: true, data: { documentId, zhTitle: zhDoc.title, enTitle: en.title } };
       } catch (error: any) {

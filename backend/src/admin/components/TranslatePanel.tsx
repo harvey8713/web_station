@@ -73,10 +73,10 @@ function TranslatePanelContent({ documentId, locale }: { documentId: string | nu
   const { post } = useFetchClient();
 
   const isEn = locale === 'en';
-  const translateLabel = isEn ? '🌐 翻译为中文并发布' : '🌐 翻译为英文并发布';
+  const translateLabel = isEn ? '🌐 翻译为中文（存草稿）' : '🌐 翻译为英文（存草稿）';
   const translateHint = isEn
-    ? '将英文内容翻译为中文，同时发布中英文两个版本。'
-    : '将中文内容翻译为英文，同时发布中英文两个版本。';
+    ? '将英文内容翻译为中文，保存为草稿，由你决定何时发布。'
+    : '将中文内容翻译为英文，保存为草稿，由你决定何时发布。';
 
   if (!documentId) {
     return <div style={s.notice}>💡 保存文章后即可使用 AI 功能。</div>;
@@ -156,7 +156,7 @@ function TranslatePanelContent({ documentId, locale }: { documentId: string | nu
 
       {translateResult && (
         <div style={s.success}>
-          ✅ 双语发布成功
+          ✅ 翻译完成，已存为草稿
           <br />
           中文：{translateResult.zhTitle}
           <br />
