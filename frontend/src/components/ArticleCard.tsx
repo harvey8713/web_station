@@ -23,7 +23,7 @@ export default function ArticleCard({article}: ArticleCardProps) {
                 alt={article.cover_image.alternativeText || article.title}
                 fill
                 unoptimized
-                className="object-contain"
+                className="object-cover object-top"
               />
             ) : (
               <div className="w-full h-full bg-[var(--paper)] flex items-center justify-center">
