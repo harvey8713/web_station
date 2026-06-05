@@ -488,25 +488,22 @@ Output strictly in JSON format:
 
       fs.writeFileSync(tmpPath, buffer);
 
-      // 用 FormData + axios 调 Strapi 自己的 upload REST 接口，最兼容
-      const FormData = require('form-data');
-      const form = new FormData();
-      form.append('files', fs.createReadStream(tmpPath), { filename: name, contentType: mime });
+      const { Readable } = require('stream');
+      const stream = Readable.from(buffer);
 
-      const strapiUrl = `http://127.0.0.1:${process.env.PORT || 1337}`;
-      const adminToken = process.env.STRAPI_API_TOKEN || '';
-
-      const response = await axios.post(`${strapiUrl}/api/upload`, form, {
-        headers: {
-          ...form.getHeaders(),
-          ...(adminToken && { Authorization: `Bearer ${adminToken}` }),
+      const uploadService = (strapi as any).plugin('upload').service('upload');
+      const result = await uploadService.upload({
+        data: { fileInfo: { name, caption: '', alternativeText: '' } },
+        files: {
+          name,
+          type: mime,
+          size: buffer.length / 1024,
+          path: tmpPath,
+          stream,
         },
-        timeout: 60000,
-        maxContentLength: Infinity,
-        maxBodyLength: Infinity,
       });
 
-      const uploadedFile = Array.isArray(response.data) ? response.data[0] : response.data;
+      const uploadedFile = Array.isArray(result) ? result[0] : result;
 
       ctx.body = {
         success: true,
@@ -514,8 +511,8 @@ Output strictly in JSON format:
         url: uploadedFile.url,
       };
     } catch (error: any) {
-      (strapi as any).log.error('[agent-upload-image] 失败:', error.message);
-      return ctx.badRequest(error.response?.data?.error?.message || error.message || '图片上传失败');
+      (strapi as any).log.error('[agent-upload-image] 失败:', error.message, error.stack);
+      return ctx.badRequest(error.message || '图片上传失败');
     } finally {
       if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath);
     }
