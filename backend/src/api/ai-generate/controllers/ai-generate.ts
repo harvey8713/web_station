@@ -1,4 +1,7 @@
 import axios from 'axios';
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
 
 const QWEN_URL = 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions';
 const ZH_LOCALE = process.env.ZH_LOCALE || 'zh-CN';
@@ -477,21 +480,23 @@ Output strictly in JSON format:
 
     if (!base64) return ctx.badRequest('缺少 base64 字段');
 
+    const tmpPath = path.join(os.tmpdir(), `agent-upload-${Date.now()}.tmp`);
     try {
       const buffer = Buffer.from(base64, 'base64');
       const name = filename || `upload-${Date.now()}.png`;
       const mime = mimetype || 'image/png';
-      const ext = name.split('.').pop() || 'png';
+
+      // Strapi upload service 需要真实文件路径
+      fs.writeFileSync(tmpPath, buffer);
 
       const uploadService = (strapi as any).plugin('upload').service('upload');
       const [uploadedFile] = await uploadService.upload({
         data: {},
         files: {
-          path: null,
+          path: tmpPath,
           name,
           type: mime,
           size: buffer.length / 1024,
-          buffer,
         },
       });
 
@@ -503,6 +508,8 @@ Output strictly in JSON format:
     } catch (error: any) {
       (strapi as any).log.error('[agent-upload-image] 失败:', error.message);
       return ctx.badRequest(error.message || '图片上传失败');
+    } finally {
+      if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath);
     }
   },
 
