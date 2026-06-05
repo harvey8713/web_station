@@ -486,19 +486,27 @@ Output strictly in JSON format:
       const name = filename || `upload-${Date.now()}.png`;
       const mime = mimetype || 'image/png';
 
-      // Strapi upload service 需要真实文件路径
       fs.writeFileSync(tmpPath, buffer);
 
-      const uploadService = (strapi as any).plugin('upload').service('upload');
-      const [uploadedFile] = await uploadService.upload({
-        data: {},
-        files: {
-          path: tmpPath,
-          name,
-          type: mime,
-          size: buffer.length / 1024,
+      // 用 FormData + axios 调 Strapi 自己的 upload REST 接口，最兼容
+      const FormData = require('form-data');
+      const form = new FormData();
+      form.append('files', fs.createReadStream(tmpPath), { filename: name, contentType: mime });
+
+      const strapiUrl = `http://127.0.0.1:${process.env.PORT || 1337}`;
+      const adminToken = process.env.STRAPI_API_TOKEN || '';
+
+      const response = await axios.post(`${strapiUrl}/api/upload`, form, {
+        headers: {
+          ...form.getHeaders(),
+          ...(adminToken && { Authorization: `Bearer ${adminToken}` }),
         },
+        timeout: 60000,
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity,
       });
+
+      const uploadedFile = Array.isArray(response.data) ? response.data[0] : response.data;
 
       ctx.body = {
         success: true,
@@ -507,7 +515,7 @@ Output strictly in JSON format:
       };
     } catch (error: any) {
       (strapi as any).log.error('[agent-upload-image] 失败:', error.message);
-      return ctx.badRequest(error.message || '图片上传失败');
+      return ctx.badRequest(error.response?.data?.error?.message || error.message || '图片上传失败');
     } finally {
       if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath);
     }
