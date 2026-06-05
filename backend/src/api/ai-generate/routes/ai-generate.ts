@@ -27,5 +27,23 @@ export default {
         policies: [],
       },
     },
+    {
+      method: 'POST',
+      path: '/agent-upload-image',
+      handler: 'ai-generate.agentUploadImage',
+      config: {
+        auth: false,
+        policies: [],
+      },
+    },
+    {
+      method: 'POST',
+      path: '/agent-upload',
+      handler: 'ai-generate.agentUpload',
+      config: {
+        auth: false,
+        policies: [],
+      },
+    },
   ],
 };

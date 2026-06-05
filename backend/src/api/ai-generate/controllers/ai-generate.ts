@@ -165,6 +165,49 @@ function readingTime(content: string, lang: 'zh' | 'en') {
 
 // ── Controller ────────────────────────────────────────────────────────────────
 
+const AGENT_TOKEN = process.env.AGENT_UPLOAD_TOKEN || '';
+
+function checkAgentToken(ctx: any): boolean {
+  const token = ctx.request.body?.token || ctx.request.headers['x-agent-token'];
+  if (!AGENT_TOKEN) {
+    (strapi as any).log.warn('[agent-upload] AGENT_UPLOAD_TOKEN not set');
+    return false;
+  }
+  return token === AGENT_TOKEN;
+}
+
+// blocks[] → HTML string，固定格式规范
+function blocksToHtml(blocks: Array<{ type: string; text?: string; image_id?: number; image_url?: string }>): string {
+  let html = '';
+  for (const block of blocks) {
+    switch (block.type) {
+      case 'image': {
+        const src = block.image_url || '';
+        if (src) {
+          html += `<figure class="image image_resized" style="width:75%;"><img src="${src}" alt=""/></figure>`;
+        }
+        break;
+      }
+      case 'caption':
+        html += `<p style="text-align:center;"><i><strong>${block.text || ''}</strong></i></p>`;
+        break;
+      case 'h2':
+        html += `<h2>${block.text || ''}</h2>`;
+        break;
+      case 'blockquote':
+        html += `<blockquote><p>${block.text || ''}</p></blockquote>`;
+        break;
+      case 'paragraph':
+      default:
+        if (block.text?.trim()) {
+          html += `<p>${block.text}</p>`;
+        }
+        break;
+    }
+  }
+  return html;
+}
+
 export default {
   async translate(ctx: any) {
     const { documentId, sourceLocale } = ctx.request.body as { documentId?: string; sourceLocale?: string };
@@ -419,6 +462,205 @@ Output strictly in JSON format:
     } catch (error: any) {
       (strapi as any).log.error('AI 文章生成失败:', error.message);
       return ctx.badRequest(error.message || 'AI 生成失败，请重试');
+    }
+  },
+
+  // ── Agent: 上传单张图片（base64） ─────────────────────────────────────────────
+  async agentUploadImage(ctx: any) {
+    if (!checkAgentToken(ctx)) return ctx.unauthorized('无效的 token');
+
+    const { filename, mimetype, base64 } = ctx.request.body as {
+      filename?: string;
+      mimetype?: string;
+      base64?: string;
+    };
+
+    if (!base64) return ctx.badRequest('缺少 base64 字段');
+
+    try {
+      const buffer = Buffer.from(base64, 'base64');
+      const name = filename || `upload-${Date.now()}.png`;
+      const mime = mimetype || 'image/png';
+      const ext = name.split('.').pop() || 'png';
+
+      const uploadService = (strapi as any).plugin('upload').service('upload');
+      const [uploadedFile] = await uploadService.upload({
+        data: {},
+        files: {
+          path: null,
+          name,
+          type: mime,
+          size: buffer.length / 1024,
+          buffer,
+        },
+      });
+
+      ctx.body = {
+        success: true,
+        id: uploadedFile.id,
+        url: uploadedFile.url,
+      };
+    } catch (error: any) {
+      (strapi as any).log.error('[agent-upload-image] 失败:', error.message);
+      return ctx.badRequest(error.message || '图片上传失败');
+    }
+  },
+
+  // ── Agent: 上传完整文章（blocks + 双语草稿） ──────────────────────────────────
+  async agentUpload(ctx: any) {
+    if (!checkAgentToken(ctx)) return ctx.unauthorized('无效的 token');
+
+    const {
+      title,
+      excerpt,
+      category_slug,
+      cover_image_id,
+      locale = 'en',
+      blocks = [],
+    } = ctx.request.body as {
+      title?: string;
+      excerpt?: string;
+      category_slug?: string;
+      cover_image_id?: number;
+      locale?: string;
+      blocks?: Array<{ type: string; text?: string; image_id?: number; image_url?: string }>;
+    };
+
+    if (!title?.trim()) return ctx.badRequest('缺少 title');
+    if (!blocks.length) return ctx.badRequest('缺少 blocks');
+
+    try {
+      // 把 image_id 解析成 url（从 Strapi 媒体库查）
+      const imageIds = blocks.filter(b => b.type === 'image' && b.image_id).map(b => b.image_id!);
+      const idToUrl: Record<number, string> = {};
+      if (imageIds.length) {
+        const files = await (strapi as any).entityService.findMany('plugin::upload.file', {
+          filters: { id: { $in: imageIds } },
+          fields: ['id', 'url'],
+        });
+        for (const f of files) idToUrl[f.id] = f.url;
+      }
+
+      // 补全 blocks 里的 image_url
+      const resolvedBlocks = blocks.map(b => {
+        if (b.type === 'image' && b.image_id && idToUrl[b.image_id]) {
+          return { ...b, image_url: idToUrl[b.image_id] };
+        }
+        return b;
+      });
+
+      const html = blocksToHtml(resolvedBlocks);
+      const sourceLang = locale === 'en' ? 'en' : 'zh';
+
+      // 查分类
+      let categoryId: number | undefined;
+      if (category_slug) {
+        const cats = await (strapi as any).entityService.findMany('api::category.category', {
+          filters: { slug: category_slug },
+          fields: ['id'],
+        });
+        if (cats?.[0]) categoryId = cats[0].id;
+      }
+
+      const baseData: any = {
+        title,
+        excerpt: excerpt || null,
+        content: html,
+        reading_time: readingTime(html, sourceLang === 'zh' ? 'zh' : 'en'),
+        published_date: new Date().toISOString(),
+        ...(cover_image_id && { cover_image: cover_image_id }),
+        ...(categoryId && { category: categoryId }),
+      };
+
+      // 创建原文语言草稿
+      const sourceLocale = sourceLang === 'zh' ? ZH_LOCALE : 'en';
+      const created = await (strapi as any).documents('api::article.article').create({
+        data: baseData,
+        locale: sourceLocale,
+        status: 'draft',
+      });
+      const documentId = created.documentId;
+
+      // AI 翻译生成另一语言草稿
+      const contentMd = htmlToMarkdown(html);
+      let translatedTitle = '';
+
+      if (sourceLang === 'zh') {
+        // zh → en
+        const enPrompt = `Translate the following JSON content into professional English. Maintain the jewellery brand tone: minimalist, architectural, artistic. Keep the same Markdown structure.
+IMPORTANT: Preserve all Markdown image syntax \`![alt](url)\` exactly as-is.
+
+\`\`\`json
+${JSON.stringify({ title, excerpt: excerpt || null, content: contentMd }, null, 2)}
+\`\`\`
+
+Output strictly in JSON format:
+\`\`\`json
+{"title":"English title","excerpt":"English excerpt","content":"English content in Markdown"}
+\`\`\``;
+        const enRaw = await callQwen([{ role: 'user', content: enPrompt }]);
+        const en = extractJson(enRaw);
+        const enHtml = en.content ? markdownToHtml(en.content) : null;
+        translatedTitle = en.title;
+        await (strapi as any).documents('api::article.article').update({
+          documentId,
+          data: {
+            title: en.title,
+            excerpt: en.excerpt ?? null,
+            content: enHtml,
+            reading_time: enHtml ? readingTime(enHtml, 'en') : 5,
+            ...(cover_image_id && { cover_image: cover_image_id }),
+            ...(categoryId && { category: categoryId }),
+          },
+          locale: 'en',
+          status: 'draft',
+        });
+      } else {
+        // en → zh
+        const zhPrompt = `将以下 JSON 内容翻译成专业中文。保持珠宝品牌调性：极简、建筑美学、艺术性。content 字段保持相同的 Markdown 结构。
+重要：所有 Markdown 图片语法 \`![alt](url)\` 原样保留，不得翻译或修改图片 URL。
+
+\`\`\`json
+${JSON.stringify({ title, excerpt: excerpt || null, content: contentMd }, null, 2)}
+\`\`\`
+
+严格按照以下 JSON 格式输出：
+\`\`\`json
+{"title":"中文标题","excerpt":"中文摘要","content":"中文正文 Markdown"}
+\`\`\``;
+        const zhRaw = await callQwen([{ role: 'user', content: zhPrompt }]);
+        const zh = extractJson(zhRaw);
+        const zhHtml = zh.content ? markdownToHtml(zh.content) : null;
+        translatedTitle = zh.title;
+        await (strapi as any).documents('api::article.article').update({
+          documentId,
+          data: {
+            title: zh.title,
+            excerpt: zh.excerpt ?? null,
+            content: zhHtml,
+            reading_time: zhHtml ? readingTime(zhHtml, 'zh') : 5,
+            ...(cover_image_id && { cover_image: cover_image_id }),
+            ...(categoryId && { category: categoryId }),
+          },
+          locale: ZH_LOCALE,
+          status: 'draft',
+        });
+      }
+
+      const adminUrl = `${process.env.PUBLIC_ADMIN_URL || 'http://47.242.252.133:1337'}/admin/content-manager/collection-types/api::article.article/${documentId}`;
+
+      ctx.body = {
+        success: true,
+        data: {
+          documentId,
+          sourceTitle: title,
+          translatedTitle,
+          adminUrl,
+        },
+      };
+    } catch (error: any) {
+      (strapi as any).log.error('[agent-upload] 失败:', error.message);
+      return ctx.badRequest(error.message || '上传失败，请重试');
     }
   },
 };
