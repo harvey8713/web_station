@@ -1,15 +1,4 @@
-export default () => async (ctx: any, next: any) => {
+// slug 字段已改为 string 类型，uid 自动生成逻辑由 lifecycles.ts 接管，此 middleware 保留为空
+export default () => async (_ctx: any, next: any) => {
   await next();
-
-  if (
-    ctx.method === 'POST' &&
-    ctx.path === '/content-manager/uid/generate' &&
-    ctx.request.body?.contentTypeUID === 'api::article.article' &&
-    ctx.request.body?.field === 'slug'
-  ) {
-    const generated = ctx.body?.data;
-    if (!generated || !/^[a-z0-9-]+$/.test(generated)) {
-      ctx.body = { data: `article-${Date.now()}` };
-    }
-  }
 };
