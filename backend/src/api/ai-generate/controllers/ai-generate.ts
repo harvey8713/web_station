@@ -262,8 +262,9 @@ Output strictly in JSON format:
         const enRaw = await callQwen([{ role: 'user', content: enPrompt }]);
         const en = extractJson(enRaw);
         const enHtml = en.content ? markdownToHtml(en.content) : null;
-        const enSlug = zhDoc.slug ||
-          (en.title as string).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        const enSlug = (zhDoc.slug && /^[a-z0-9-]+$/.test(zhDoc.slug))
+          ? zhDoc.slug
+          : `article-${Date.now()}`;
 
         await (strapi as any).documents('api::article.article').update({
           documentId,
