@@ -12,7 +12,7 @@
 ```
 POST http://47.242.252.133:1337/api/agent-upload-image
 {
-  "token": "<AGENT_UPLOAD_TOKEN>",
+  "token": "0926harvey",
   "filename": "image1.png",
   "mimetype": "image/png",
   "base64": "<图片的 base64 字符串>"
@@ -24,7 +24,7 @@ POST http://47.242.252.133:1337/api/agent-upload-image
 ```
 POST http://47.242.252.133:1337/api/agent-upload
 {
-  "token": "<AGENT_UPLOAD_TOKEN>",
+  "token": "0926harvey",
   "title": "文章标题",
   "excerpt": "摘要（1-2句话）",
   "category_slug": "style | designer | culture | insights",
