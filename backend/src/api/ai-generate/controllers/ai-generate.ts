@@ -465,41 +465,43 @@ Output strictly in JSON format:
     }
   },
 
-  // ── Agent: 上传单张图片（base64） ─────────────────────────────────────────────
+  // ── Agent: 上传单张图片（multipart 或 base64） ───────────────────────────────
   async agentUploadImage(ctx: any) {
-    if (!checkAgentToken(ctx)) return ctx.unauthorized('无效的 token');
-
-    const { filename, mimetype, base64 } = ctx.request.body as {
-      filename?: string;
-      mimetype?: string;
-      base64?: string;
-    };
-
-    if (!base64) return ctx.badRequest('缺少 base64 字段');
+    // token 支持 body 字段（JSON/form）或 header
+    const token = ctx.request.body?.token || ctx.request.headers['x-agent-token'];
+    if (!AGENT_TOKEN || token !== AGENT_TOKEN) return ctx.unauthorized('无效的 token');
 
     try {
-      const buffer = Buffer.from(base64, 'base64');
-      const name = filename || `upload-${Date.now()}.png`;
-      const mime = mimetype || 'image/png';
+      let buffer: Buffer;
+      let name: string;
+      let mime: string;
+
+      const multipartFile = ctx.request.files?.file;
+      if (multipartFile) {
+        // multipart/form-data 上传
+        const { default: fs } = await import('fs');
+        buffer = fs.readFileSync(multipartFile.filepath);
+        name = multipartFile.originalFilename || multipartFile.name || `upload-${Date.now()}.png`;
+        mime = multipartFile.mimetype || multipartFile.type || 'image/png';
+      } else {
+        // JSON base64 上传
+        const { base64, filename, mimetype } = ctx.request.body as {
+          base64?: string; filename?: string; mimetype?: string;
+        };
+        if (!base64) return ctx.badRequest('缺少文件：请用 multipart/form-data 上传 file 字段，或 JSON 提供 base64 字段');
+        buffer = Buffer.from(base64, 'base64');
+        name = filename || `upload-${Date.now()}.png`;
+        mime = mimetype || 'image/png';
+      }
 
       const uploadService = (strapi as any).plugin('upload').service('upload');
       const result = await uploadService.upload({
         data: { fileInfo: { name, caption: '', alternativeText: '' } },
-        files: {
-          name,
-          type: mime,
-          size: buffer.length / 1024,
-          buffer,
-        },
+        files: { name, type: mime, size: buffer.length / 1024, buffer },
       });
 
       const uploadedFile = Array.isArray(result) ? result[0] : result;
-
-      ctx.body = {
-        success: true,
-        id: uploadedFile.id,
-        url: uploadedFile.url,
-      };
+      ctx.body = { success: true, id: uploadedFile.id, url: uploadedFile.url };
     } catch (error: any) {
       (strapi as any).log.error('[agent-upload-image] 失败:', error.message, error.stack);
       return ctx.badRequest(error.message || '图片上传失败');

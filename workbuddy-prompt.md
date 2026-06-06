@@ -11,12 +11,12 @@
 **上传单张图片：**
 ```
 POST http://47.242.252.133:1337/api/agent-upload-image
-{
-  "token": "0926harvey",
-  "filename": "image1.png",
-  "mimetype": "image/png",
-  "base64": "<图片的 base64 字符串>"
-}
+Content-Type: multipart/form-data
+
+字段：
+  token    = "0926harvey"   （form 字段）
+  file     = <图片文件二进制>  （file 字段）
+
 响应：{ "success": true, "id": 42, "url": "https://oss..." }
 ```
 
@@ -98,6 +98,7 @@ POST http://47.242.252.133:1337/api/agent-upload
 ### Step 4：逐张上传图片
 
 按文章中出现的顺序，逐张调用 `/api/agent-upload-image`，收集每张图的 `id`。
+使用 multipart/form-data 上传：`token` 作为 form 字段，图片作为 `file` 字段（二进制，不要 base64）。
 上传时告知用户进度：`正在上传图片 2/14...`
 
 ### Step 5：组装并上传文章
