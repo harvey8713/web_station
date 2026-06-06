@@ -1,4 +1,7 @@
 import axios from 'axios';
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
 
 const QWEN_URL = 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions';
 const ZH_LOCALE = process.env.ZH_LOCALE || 'zh-CN';
@@ -467,37 +470,42 @@ Output strictly in JSON format:
 
   // ── Agent: 上传单张图片（multipart 或 base64） ───────────────────────────────
   async agentUploadImage(ctx: any) {
-    // token 支持 body 字段（JSON/form）或 header
     const token = ctx.request.body?.token || ctx.request.headers['x-agent-token'];
     if (!AGENT_TOKEN || token !== AGENT_TOKEN) return ctx.unauthorized('无效的 token');
 
+    const tmpPath = path.join(os.tmpdir(), `agent-upload-${Date.now()}.tmp`);
     try {
-      let buffer: Buffer;
       let name: string;
       let mime: string;
 
       const multipartFile = ctx.request.files?.file;
       if (multipartFile) {
-        // multipart/form-data 上传
-        const { default: fs } = await import('fs');
-        buffer = fs.readFileSync(multipartFile.filepath);
+        // multipart/form-data：koa-body 已写好临时文件，直接复制路径
         name = multipartFile.originalFilename || multipartFile.name || `upload-${Date.now()}.png`;
         mime = multipartFile.mimetype || multipartFile.type || 'image/png';
+        fs.copyFileSync(multipartFile.filepath, tmpPath);
       } else {
-        // JSON base64 上传
+        // JSON base64
         const { base64, filename, mimetype } = ctx.request.body as {
           base64?: string; filename?: string; mimetype?: string;
         };
         if (!base64) return ctx.badRequest('缺少文件：请用 multipart/form-data 上传 file 字段，或 JSON 提供 base64 字段');
-        buffer = Buffer.from(base64, 'base64');
+        const buffer = Buffer.from(base64, 'base64');
+        fs.writeFileSync(tmpPath, buffer);
         name = filename || `upload-${Date.now()}.png`;
         mime = mimetype || 'image/png';
       }
 
+      const stat = fs.statSync(tmpPath);
       const uploadService = (strapi as any).plugin('upload').service('upload');
       const result = await uploadService.upload({
         data: { fileInfo: { name, caption: '', alternativeText: '' } },
-        files: { name, type: mime, size: buffer.length / 1024, buffer },
+        files: {
+          name,
+          type: mime,
+          size: stat.size / 1024,
+          filepath: tmpPath,
+        },
       });
 
       const uploadedFile = Array.isArray(result) ? result[0] : result;
@@ -505,6 +513,8 @@ Output strictly in JSON format:
     } catch (error: any) {
       (strapi as any).log.error('[agent-upload-image] 失败:', error.message, error.stack);
       return ctx.badRequest(error.message || '图片上传失败');
+    } finally {
+      if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath);
     }
   },
 
