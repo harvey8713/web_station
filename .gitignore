@@ -52,6 +52,9 @@ Thumbs.db
 # Local images (not for repo)
 catier*.jpg
 
+# Workbuddy prompt (local only, not for repo)
+workbuddy-prompt.md
+
 # Local reference assets
 article.png
 article1.png
