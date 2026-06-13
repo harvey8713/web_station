@@ -1,8 +1,7 @@
 import {notFound} from 'next/navigation';
-import {getArticleBySlug, getImageUrl} from '@/lib/api';
+import {getArticleBySlug} from '@/lib/api';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
-import Image from 'next/image';
 
 export const revalidate = 300;
 
@@ -23,20 +22,6 @@ export default async function ArticlePage({
       <Navigation />
 
       <main className="pt-[160px] pb-32">
-        {/* Hero Image — full bleed */}
-        {article.cover_image?.url && (
-          <div className="w-full h-[60vh] relative mb-16">
-            <Image
-              src={getImageUrl(article.cover_image.url)}
-              alt={article.cover_image.alternativeText || article.title}
-              fill
-              unoptimized
-              className="object-cover"
-              priority
-            />
-          </div>
-        )}
-
         {/* Centered content */}
         <div className="flex justify-center px-8 md:px-[160px]">
           <article className="w-full max-w-[860px]">
