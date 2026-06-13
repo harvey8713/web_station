@@ -527,15 +527,19 @@ Output strictly in JSON format:
       excerpt,
       category_slug,
       cover_image_id,
+      documentId,
       locale = 'en',
       blocks = [],
+      skip_translate,
     } = ctx.request.body as {
       title?: string;
       excerpt?: string;
       category_slug?: string;
       cover_image_id?: number;
+      documentId?: string;
       locale?: string;
       blocks?: Array<{ type: string; text?: string; image_id?: number; image_url?: string }>;
+      skip_translate?: boolean;
     };
 
     if (!title?.trim()) return ctx.badRequest('缺少 title');
@@ -584,92 +588,108 @@ Output strictly in JSON format:
         ...(categoryId && { category: categoryId }),
       };
 
-      // 创建原文语言草稿
       const sourceLocale = sourceLang === 'zh' ? ZH_LOCALE : 'en';
-      const created = await (strapi as any).documents('api::article.article').create({
-        data: baseData,
-        locale: sourceLocale,
-        status: 'draft',
-      });
-      const documentId = created.documentId;
 
-      // AI 翻译生成另一语言草稿
-      const contentMd = htmlToMarkdown(html);
-      let translatedTitle = '';
+      if (documentId) {
+        // ── 更新已有草稿 ──
+        await (strapi as any).documents('api::article.article').update({
+          documentId,
+          data: baseData,
+          locale: sourceLocale,
+          status: 'draft',
+        });
 
-      if (sourceLang === 'zh') {
-        // zh → en
-        const enPrompt = `Translate the following JSON content into professional English. Maintain the jewellery brand tone: minimalist, architectural, artistic. Keep the same Markdown structure.
-IMPORTANT: Preserve all Markdown image syntax \`![alt](url)\` exactly as-is.
-
-\`\`\`json
-${JSON.stringify({ title, excerpt: excerpt || null, content: contentMd }, null, 2)}
-\`\`\`
-
-Output strictly in JSON format:
-\`\`\`json
-{"title":"English title","excerpt":"English excerpt","content":"English content in Markdown"}
-\`\`\``;
-        const enRaw = await callQwen([{ role: 'user', content: enPrompt }]);
-        const en = extractJson(enRaw);
-        const enHtml = en.content ? markdownToHtml(en.content) : null;
-        translatedTitle = en.title;
+        // 同步更新另一语言的封面图和分类
+        const targetLocale = sourceLocale === 'en' ? ZH_LOCALE : 'en';
         await (strapi as any).documents('api::article.article').update({
           documentId,
           data: {
-            title: en.title,
-            excerpt: en.excerpt ?? null,
-            content: enHtml,
-            reading_time: enHtml ? readingTime(enHtml, 'en') : 5,
             ...(cover_image_id && { cover_image: cover_image_id }),
             ...(categoryId && { category: categoryId }),
           },
-          locale: 'en',
+          locale: targetLocale,
           status: 'draft',
         });
+
+        // AI 重新翻译另一语言
+        let translatedTitle = '';
+        if (!skip_translate) {
+          const contentMd = htmlToMarkdown(html);
+          if (sourceLang === 'zh') {
+            const enRaw = await callQwen([{ role: 'user', content: `Translate the following JSON content into professional English. Maintain the jewellery brand tone: minimalist, architectural, artistic. Keep the same Markdown structure.\nIMPORTANT: Preserve all Markdown image syntax \\`![alt](url)\\` exactly as-is.\n\n\`\`\`json\n${JSON.stringify({ title, excerpt: excerpt || null, content: contentMd }, null, 2)}\n\`\`\`\n\nOutput strictly in JSON format:\n\`\`\`json\n{"title":"English title","excerpt":"English excerpt","content":"English content in Markdown"}\n\`\`\`` }]);
+            const en = extractJson(enRaw);
+            const enHtml = en.content ? markdownToHtml(en.content) : null;
+            translatedTitle = en.title;
+            await (strapi as any).documents('api::article.article').update({
+              documentId, locale: 'en', status: 'draft',
+              data: { title: en.title, excerpt: en.excerpt ?? null, content: enHtml, reading_time: enHtml ? readingTime(enHtml, 'en') : 5 },
+            });
+          } else {
+            const zhRaw = await callQwen([{ role: 'user', content: `将以下 JSON 内容翻译成专业中文。保持珠宝品牌调性：极简、建筑美学、艺术性。content 字段保持相同的 Markdown 结构。\n重要：所有 Markdown 图片语法 \\`![alt](url)\\` 原样保留，不得翻译或修改图片 URL。\n\n\`\`\`json\n${JSON.stringify({ title, excerpt: excerpt || null, content: contentMd }, null, 2)}\n\`\`\`\n\n严格按照以下 JSON 格式输出：\n\`\`\`json\n{"title":"中文标题","excerpt":"中文摘要","content":"中文正文 Markdown"}\n\`\`\`` }]);
+            const zh = extractJson(zhRaw);
+            const zhHtml = zh.content ? markdownToHtml(zh.content) : null;
+            translatedTitle = zh.title;
+            await (strapi as any).documents('api::article.article').update({
+              documentId, locale: ZH_LOCALE, status: 'draft',
+              data: { title: zh.title, excerpt: zh.excerpt ?? null, content: zhHtml, reading_time: zhHtml ? readingTime(zhHtml, 'zh') : 5 },
+            });
+          }
+        }
+
+        ctx.body = {
+          success: true,
+          data: {
+            documentId,
+            sourceTitle: title,
+            translatedTitle,
+            adminUrl: `${process.env.PUBLIC_ADMIN_URL || 'http://47.242.252.133:1337'}/admin/content-manager/collection-types/api::article.article/${documentId}`,
+            updated: true,
+          },
+        };
       } else {
-        // en → zh
-        const zhPrompt = `将以下 JSON 内容翻译成专业中文。保持珠宝品牌调性：极简、建筑美学、艺术性。content 字段保持相同的 Markdown 结构。
-重要：所有 Markdown 图片语法 \`![alt](url)\` 原样保留，不得翻译或修改图片 URL。
-
-\`\`\`json
-${JSON.stringify({ title, excerpt: excerpt || null, content: contentMd }, null, 2)}
-\`\`\`
-
-严格按照以下 JSON 格式输出：
-\`\`\`json
-{"title":"中文标题","excerpt":"中文摘要","content":"中文正文 Markdown"}
-\`\`\``;
-        const zhRaw = await callQwen([{ role: 'user', content: zhPrompt }]);
-        const zh = extractJson(zhRaw);
-        const zhHtml = zh.content ? markdownToHtml(zh.content) : null;
-        translatedTitle = zh.title;
-        await (strapi as any).documents('api::article.article').update({
-          documentId,
-          data: {
-            title: zh.title,
-            excerpt: zh.excerpt ?? null,
-            content: zhHtml,
-            reading_time: zhHtml ? readingTime(zhHtml, 'zh') : 5,
-            ...(cover_image_id && { cover_image: cover_image_id }),
-            ...(categoryId && { category: categoryId }),
-          },
-          locale: ZH_LOCALE,
+        // ── 新建草稿 ──
+        const created = await (strapi as any).documents('api::article.article').create({
+          data: baseData,
+          locale: sourceLocale,
           status: 'draft',
         });
+        const newDocumentId = created.documentId;
+
+        let translatedTitle = '';
+        if (!skip_translate) {
+          const contentMd = htmlToMarkdown(html);
+          if (sourceLang === 'zh') {
+            const enRaw = await callQwen([{ role: 'user', content: `Translate the following JSON content into professional English. Maintain the jewellery brand tone: minimalist, architectural, artistic. Keep the same Markdown structure.\nIMPORTANT: Preserve all Markdown image syntax \\`![alt](url)\\` exactly as-is.\n\n\`\`\`json\n${JSON.stringify({ title, excerpt: excerpt || null, content: contentMd }, null, 2)}\n\`\`\`\n\nOutput strictly in JSON format:\n\`\`\`json\n{"title":"English title","excerpt":"English excerpt","content":"English content in Markdown"}\n\`\`\`` }]);
+            const en = extractJson(enRaw);
+            const enHtml = en.content ? markdownToHtml(en.content) : null;
+            translatedTitle = en.title;
+            await (strapi as any).documents('api::article.article').update({
+              documentId: newDocumentId, locale: 'en', status: 'draft',
+              data: { title: en.title, excerpt: en.excerpt ?? null, content: enHtml, reading_time: enHtml ? readingTime(enHtml, 'en') : 5, ...(cover_image_id && { cover_image: cover_image_id }), ...(categoryId && { category: categoryId }) },
+            });
+          } else {
+            const zhRaw = await callQwen([{ role: 'user', content: `将以下 JSON 内容翻译成专业中文。保持珠宝品牌调性：极简、建筑美学、艺术性。content 字段保持相同的 Markdown 结构。\n重要：所有 Markdown 图片语法 \\`![alt](url)\\` 原样保留，不得翻译或修改图片 URL。\n\n\`\`\`json\n${JSON.stringify({ title, excerpt: excerpt || null, content: contentMd }, null, 2)}\n\`\`\`\n\n严格按照以下 JSON 格式输出：\n\`\`\`json\n{"title":"中文标题","excerpt":"中文摘要","content":"中文正文 Markdown"}\n\`\`\`` }]);
+            const zh = extractJson(zhRaw);
+            const zhHtml = zh.content ? markdownToHtml(zh.content) : null;
+            translatedTitle = zh.title;
+            await (strapi as any).documents('api::article.article').update({
+              documentId: newDocumentId, locale: ZH_LOCALE, status: 'draft',
+              data: { title: zh.title, excerpt: zh.excerpt ?? null, content: zhHtml, reading_time: zhHtml ? readingTime(zhHtml, 'zh') : 5, ...(cover_image_id && { cover_image: cover_image_id }), ...(categoryId && { category: categoryId }) },
+            });
+          }
+        }
+
+        ctx.body = {
+          success: true,
+          data: {
+            documentId: newDocumentId,
+            sourceTitle: title,
+            translatedTitle,
+            adminUrl: `${process.env.PUBLIC_ADMIN_URL || 'http://47.242.252.133:1337'}/admin/content-manager/collection-types/api::article.article/${newDocumentId}`,
+            updated: false,
+          },
+        };
       }
-
-      const adminUrl = `${process.env.PUBLIC_ADMIN_URL || 'http://47.242.252.133:1337'}/admin/content-manager/collection-types/api::article.article/${documentId}`;
-
-      ctx.body = {
-        success: true,
-        data: {
-          documentId,
-          sourceTitle: title,
-          translatedTitle,
-          adminUrl,
-        },
-      };
     } catch (error: any) {
       (strapi as any).log.error('[agent-upload] 失败:', error.message);
       return ctx.badRequest(error.message || '上传失败，请重试');
