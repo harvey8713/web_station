@@ -616,7 +616,7 @@ Output strictly in JSON format:
         if (!skip_translate) {
           const contentMd = htmlToMarkdown(html);
           if (sourceLang === 'zh') {
-            const enRaw = await callQwen([{ role: 'user', content: `Translate the following JSON content into professional English. Maintain the jewellery brand tone: minimalist, architectural, artistic. Keep the same Markdown structure.\nIMPORTANT: Preserve all Markdown image syntax \\`![alt](url)\\` exactly as-is.\n\n\`\`\`json\n${JSON.stringify({ title, excerpt: excerpt || null, content: contentMd }, null, 2)}\n\`\`\`\n\nOutput strictly in JSON format:\n\`\`\`json\n{"title":"English title","excerpt":"English excerpt","content":"English content in Markdown"}\n\`\`\`` }]);
+            const enRaw = await callQwen([{ role: 'user', content: `Translate the following JSON content into professional English. Maintain the jewellery brand tone: minimalist, architectural, artistic. Keep the same Markdown structure.\nIMPORTANT: Preserve all Markdown image syntax \`![alt](url)\` exactly as-is.\n\n\`\`\`json\n${JSON.stringify({ title, excerpt: excerpt || null, content: contentMd }, null, 2)}\n\`\`\`\n\nOutput strictly in JSON format:\n\`\`\`json\n{"title":"English title","excerpt":"English excerpt","content":"English content in Markdown"}\n\`\`\`` }]);
             const en = extractJson(enRaw);
             const enHtml = en.content ? markdownToHtml(en.content) : null;
             translatedTitle = en.title;
@@ -625,7 +625,7 @@ Output strictly in JSON format:
               data: { title: en.title, excerpt: en.excerpt ?? null, content: enHtml, reading_time: enHtml ? readingTime(enHtml, 'en') : 5 },
             });
           } else {
-            const zhRaw = await callQwen([{ role: 'user', content: `将以下 JSON 内容翻译成专业中文。保持珠宝品牌调性：极简、建筑美学、艺术性。content 字段保持相同的 Markdown 结构。\n重要：所有 Markdown 图片语法 \\`![alt](url)\\` 原样保留，不得翻译或修改图片 URL。\n\n\`\`\`json\n${JSON.stringify({ title, excerpt: excerpt || null, content: contentMd }, null, 2)}\n\`\`\`\n\n严格按照以下 JSON 格式输出：\n\`\`\`json\n{"title":"中文标题","excerpt":"中文摘要","content":"中文正文 Markdown"}\n\`\`\`` }]);
+            const zhRaw = await callQwen([{ role: 'user', content: `将以下 JSON 内容翻译成专业中文。保持珠宝品牌调性：极简、建筑美学、艺术性。content 字段保持相同的 Markdown 结构。\n重要：所有 Markdown 图片语法 \`![alt](url)\` 原样保留，不得翻译或修改图片 URL。\n\n\`\`\`json\n${JSON.stringify({ title, excerpt: excerpt || null, content: contentMd }, null, 2)}\n\`\`\`\n\n严格按照以下 JSON 格式输出：\n\`\`\`json\n{"title":"中文标题","excerpt":"中文摘要","content":"中文正文 Markdown"}\n\`\`\`` }]);
             const zh = extractJson(zhRaw);
             const zhHtml = zh.content ? markdownToHtml(zh.content) : null;
             translatedTitle = zh.title;
@@ -659,7 +659,7 @@ Output strictly in JSON format:
         if (!skip_translate) {
           const contentMd = htmlToMarkdown(html);
           if (sourceLang === 'zh') {
-            const enRaw = await callQwen([{ role: 'user', content: `Translate the following JSON content into professional English. Maintain the jewellery brand tone: minimalist, architectural, artistic. Keep the same Markdown structure.\nIMPORTANT: Preserve all Markdown image syntax \\`![alt](url)\\` exactly as-is.\n\n\`\`\`json\n${JSON.stringify({ title, excerpt: excerpt || null, content: contentMd }, null, 2)}\n\`\`\`\n\nOutput strictly in JSON format:\n\`\`\`json\n{"title":"English title","excerpt":"English excerpt","content":"English content in Markdown"}\n\`\`\`` }]);
+            const enRaw = await callQwen([{ role: 'user', content: `Translate the following JSON content into professional English. Maintain the jewellery brand tone: minimalist, architectural, artistic. Keep the same Markdown structure.\nIMPORTANT: Preserve all Markdown image syntax \`![alt](url)\` exactly as-is.\n\n\`\`\`json\n${JSON.stringify({ title, excerpt: excerpt || null, content: contentMd }, null, 2)}\n\`\`\`\n\nOutput strictly in JSON format:\n\`\`\`json\n{"title":"English title","excerpt":"English excerpt","content":"English content in Markdown"}\n\`\`\`` }]);
             const en = extractJson(enRaw);
             const enHtml = en.content ? markdownToHtml(en.content) : null;
             translatedTitle = en.title;
@@ -668,7 +668,7 @@ Output strictly in JSON format:
               data: { title: en.title, excerpt: en.excerpt ?? null, content: enHtml, reading_time: enHtml ? readingTime(enHtml, 'en') : 5, ...(cover_image_id && { cover_image: cover_image_id }), ...(categoryId && { category: categoryId }) },
             });
           } else {
-            const zhRaw = await callQwen([{ role: 'user', content: `将以下 JSON 内容翻译成专业中文。保持珠宝品牌调性：极简、建筑美学、艺术性。content 字段保持相同的 Markdown 结构。\n重要：所有 Markdown 图片语法 \\`![alt](url)\\` 原样保留，不得翻译或修改图片 URL。\n\n\`\`\`json\n${JSON.stringify({ title, excerpt: excerpt || null, content: contentMd }, null, 2)}\n\`\`\`\n\n严格按照以下 JSON 格式输出：\n\`\`\`json\n{"title":"中文标题","excerpt":"中文摘要","content":"中文正文 Markdown"}\n\`\`\`` }]);
+            const zhRaw = await callQwen([{ role: 'user', content: `将以下 JSON 内容翻译成专业中文。保持珠宝品牌调性：极简、建筑美学、艺术性。content 字段保持相同的 Markdown 结构。\n重要：所有 Markdown 图片语法 \`![alt](url)\` 原样保留，不得翻译或修改图片 URL。\n\n\`\`\`json\n${JSON.stringify({ title, excerpt: excerpt || null, content: contentMd }, null, 2)}\n\`\`\`\n\n严格按照以下 JSON 格式输出：\n\`\`\`json\n{"title":"中文标题","excerpt":"中文摘要","content":"中文正文 Markdown"}\n\`\`\`` }]);
             const zh = extractJson(zhRaw);
             const zhHtml = zh.content ? markdownToHtml(zh.content) : null;
             translatedTitle = zh.title;
