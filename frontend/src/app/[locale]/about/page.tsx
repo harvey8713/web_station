@@ -29,6 +29,15 @@ export default async function AboutPage({
             </h1>
           </div>
 
+          <div className="mb-16">
+            <img
+              src="/about_us.jpg"
+              alt="About Magician in Jewellery"
+              className="w-full object-cover object-top"
+              style={{ maxHeight: '520px' }}
+            />
+          </div>
+
           <div className="space-y-8 font-sans text-[16px] font-light leading-[1.9] text-[var(--ink)]">
             <p>
               {t('intro.body')}
